@@ -20,14 +20,13 @@ const planos = [
   {
     nome: 'Essencial',
     preco: 99,
-    sub: 'até 200 unidades',
+    sub: 'até 100 unidades',
     bullets: ['Avisos ilimitados', 'E-mail + Push', 'Recibos e ciência', 'Cadastro por QR', 'Suporte por WhatsApp'],
   },
   {
     nome: 'Profissional',
     preco: 199,
-    sub: 'acima de 200 unidades',
-    destaque: true,
+    sub: 'a partir de 101 unidades',
     bullets: ['Tudo do Essencial', 'Multi-bloco / multi-área', 'Timeline do condomínio', 'Importação em massa', 'Identidade personalizada'],
   },
   {
