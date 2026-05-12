@@ -4,7 +4,7 @@ import { ShellSindico } from '../../components/Layout'
 import { Button, Card, Input, Label, Textarea } from '../../components/ui'
 
 export default function Identidade() {
-  const [f, setF] = useState({ nome: '', descricaoCurta: '', endereco: '', cnpj: '', telefoneContato: '', emailContato: '', site: '', corPrimaria: '#0F172A' })
+  const [f, setF] = useState({ nome: '', descricaoCurta: '', endereco: '', cnpj: '', telefoneContato: '', emailContato: '', site: '', corPrimaria: '#0F172A', identificacaoObrigatoria: true })
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [salvo, setSalvo] = useState(false)
 
@@ -15,6 +15,7 @@ export default function Identidade() {
         endereco: r.data.endereco ?? '', cnpj: r.data.cnpj ?? '',
         telefoneContato: r.data.telefoneContato ?? '', emailContato: r.data.emailContato ?? '',
         site: r.data.site ?? '', corPrimaria: r.data.corPrimaria ?? '#0F172A',
+        identificacaoObrigatoria: r.data.identificacaoObrigatoria ?? true,
       })
       setLogoUrl(r.data.logoUrl)
     })
@@ -63,6 +64,18 @@ export default function Identidade() {
               <input type="color" value={f.corPrimaria} onChange={(e) => setF({ ...f, corPrimaria: e.target.value })} className="w-12 h-10 rounded border border-slate-300" />
               <Input value={f.corPrimaria} onChange={(e) => setF({ ...f, corPrimaria: e.target.value })} className="flex-1" />
             </div>
+          </div>
+          <div className="pt-4 border-t border-slate-200">
+            <Label>Formulário público de reportes (QR Code)</Label>
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input type="checkbox" checked={f.identificacaoObrigatoria}
+                onChange={(e) => setF({ ...f, identificacaoObrigatoria: e.target.checked })}
+                className="mt-1" />
+              <div className="text-sm">
+                <div className="font-medium">Exigir identificação do morador</div>
+                <div className="text-slate-500">Quando marcado, nome e apartamento são obrigatórios para enviar o formulário. Desmarque para permitir envio anônimo.</div>
+              </div>
+            </label>
           </div>
         </Card>
         <div className="flex items-center gap-2">

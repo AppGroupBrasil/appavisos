@@ -18,14 +18,16 @@ public class CondominioController(AppDbContext db, CurrentUser user) : Controlle
             .Where(c => c.Id == user.CondominioId).Select(c => new
             {
                 c.Id, c.Nome, c.Slug, c.DescricaoCurta, c.Endereco, c.Cnpj,
-                c.TelefoneContato, c.EmailContato, c.Site, c.LogoUrl, c.CorPrimaria
+                c.TelefoneContato, c.EmailContato, c.Site, c.LogoUrl, c.CorPrimaria,
+                c.IdentificacaoObrigatoria
             }).FirstOrDefaultAsync();
         if (c is null) return NotFound();
         return Ok(c);
     }
 
     public record IdentidadeReq(string? Nome, string? DescricaoCurta, string? Endereco, string? Cnpj,
-        string? TelefoneContato, string? EmailContato, string? Site, string? CorPrimaria);
+        string? TelefoneContato, string? EmailContato, string? Site, string? CorPrimaria,
+        bool? IdentificacaoObrigatoria);
 
     [HttpPut("identidade")]
     [Authorize(Roles = "Sindico,Subsindico")]
@@ -42,6 +44,7 @@ public class CondominioController(AppDbContext db, CurrentUser user) : Controlle
         c.EmailContato = req.EmailContato ?? c.EmailContato;
         c.Site = req.Site ?? c.Site;
         c.CorPrimaria = req.CorPrimaria ?? c.CorPrimaria;
+        if (req.IdentificacaoObrigatoria.HasValue) c.IdentificacaoObrigatoria = req.IdentificacaoObrigatoria.Value;
         await db.SaveChangesAsync();
         return NoContent();
     }

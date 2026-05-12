@@ -29,6 +29,11 @@ export default function QrCodes() {
           <p className="text-sm text-slate-500 mb-4">Morador escaneia e vê todos os avisos atualizados — sempre o mesmo QR.</p>
           <QrComBotao endpoint="/api/qr/feed.png" arquivo={`qr-mural-${slug}.png`} />
         </Card>
+        <Card className="p-5">
+          <h2 className="font-semibold mb-3">QR de reportes (geral)</h2>
+          <p className="text-sm text-slate-500 mb-4">Morador escaneia e abre formulário para reportar ocorrências, manutenção, reclamações, sugestões.</p>
+          <QrComBotao endpoint="/api/qr/reportar.png" arquivo={`qr-reportar-${slug}.png`} />
+        </Card>
       </div>
 
       <h2 className="text-lg font-semibold mb-2">QR Code por área</h2>
@@ -40,7 +45,16 @@ export default function QrCodes() {
           {areas.map((a) => (
             <Card key={a.id} className="p-5">
               <h3 className="font-semibold mb-3">{a.nome}</h3>
-              <QrComBotao endpoint={`/api/qr/area/${a.id}.png`} arquivo={`qr-area-${a.slug}.png`} />
+              <div className="space-y-4">
+                <div>
+                  <div className="text-xs font-medium text-slate-500 mb-1">Avisos da área</div>
+                  <QrComBotao endpoint={`/api/qr/area/${a.id}.png`} arquivo={`qr-area-${a.slug}.png`} />
+                </div>
+                <div className="pt-3 border-t border-slate-200">
+                  <div className="text-xs font-medium text-slate-500 mb-1">Reportar nesta área</div>
+                  <QrComBotao endpoint={`/api/qr/reportar/area/${a.id}.png`} arquivo={`qr-reportar-${a.slug}.png`} />
+                </div>
+              </div>
             </Card>
           ))}
         </div>

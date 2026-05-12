@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<Area> Areas => Set<Area>();
     public DbSet<TimelineMensagem> Timeline => Set<TimelineMensagem>();
     public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
+    public DbSet<Reporte> Reportes => Set<Reporte>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -88,6 +89,23 @@ public class AppDbContext : DbContext
         {
             e.HasIndex(x => x.Endpoint).IsUnique();
             e.Property(x => x.Endpoint).HasMaxLength(500).IsRequired();
+        });
+
+        b.Entity<Reporte>(e =>
+        {
+            e.HasIndex(x => x.TokenPublico).IsUnique();
+            e.HasIndex(x => new { x.CondominioId, x.CriadoEm });
+            e.Property(x => x.Titulo).HasMaxLength(160).IsRequired();
+            e.Property(x => x.Descricao).IsRequired();
+            e.Property(x => x.Nome).HasMaxLength(160);
+            e.Property(x => x.Bloco).HasMaxLength(80);
+            e.Property(x => x.Apartamento).HasMaxLength(20);
+            e.Property(x => x.Telefone).HasMaxLength(30);
+            e.Property(x => x.Email).HasMaxLength(200);
+            e.Property(x => x.TokenPublico).HasMaxLength(20).IsRequired();
+            e.Property(x => x.FotosJson).IsRequired();
+            e.HasOne(x => x.Condominio).WithMany().HasForeignKey(x => x.CondominioId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Area).WithMany().HasForeignKey(x => x.AreaId).OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

@@ -52,6 +52,26 @@ public class QrController(AppDbContext db, CurrentUser user, IConfiguration cfg)
         return File(GerarPng($"{BaseUrl}/q/{a.QrToken}", tamanho), "image/png");
     }
 
+    [HttpGet("reportar.png")]
+    [Authorize(Roles = "Sindico,Subsindico")]
+    public async Task<IActionResult> QrReportar([FromQuery] int tamanho = 12)
+    {
+        var slug = await db.Condominios.Where(c => c.Id == user.CondominioId).Select(c => c.Slug).FirstOrDefaultAsync();
+        if (slug is null) return NotFound();
+        return File(GerarPng($"{BaseUrl}/c/{slug}/reportar", tamanho), "image/png");
+    }
+
+    [HttpGet("reportar/area/{areaId:guid}.png")]
+    [Authorize(Roles = "Sindico,Subsindico")]
+    public async Task<IActionResult> QrReportarArea(Guid areaId, [FromQuery] int tamanho = 12)
+    {
+        var data = await db.Areas.AsNoTracking().Include(a => a.Condominio)
+            .Where(a => a.Id == areaId && a.CondominioId == user.CondominioId)
+            .Select(a => new { a.Id, CondSlug = a.Condominio.Slug }).FirstOrDefaultAsync();
+        if (data is null) return NotFound();
+        return File(GerarPng($"{BaseUrl}/c/{data.CondSlug}/reportar?area={data.Id}", tamanho), "image/png");
+    }
+
     [HttpGet("/q/{token}")]
     public async Task<IActionResult> Resolver(string token)
     {

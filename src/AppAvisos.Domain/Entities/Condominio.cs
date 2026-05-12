@@ -22,6 +22,8 @@ public class Condominio
     public DateTime? UltimoPagamentoEm { get; set; }
     public string? ObservacoesMaster { get; set; }
 
+    public bool IdentificacaoObrigatoria { get; set; } = true;
+
     public List<Bloco> Blocos { get; set; } = new();
     public List<Morador> Moradores { get; set; } = new();
     public List<Aviso> Avisos { get; set; } = new();

@@ -25,6 +25,8 @@ import CadastroPublico from './pages/morador/CadastroPublico'
 import EncontrarCondominio from './pages/morador/EncontrarCondominio'
 import AtivarPush from './pages/morador/AtivarPush'
 import Master from './pages/master/Master'
+import Reportar from './pages/Reportar'
+import Reportes from './pages/sindico/Reportes'
 
 function Protegida({ children, perfil }: { children: React.ReactNode; perfil?: string | string[] }) {
   const { user } = useAuth()
@@ -46,6 +48,8 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/login" element={<Login />} />
         <Route path="/cadastrar-condominio" element={<CadastroCondominio />} />
         <Route path="/cadastro/:slug" element={<CadastroPublico />} />
+        <Route path="/c/:slug/reportar" element={<Reportar />} />
+        <Route path="/painel/reportes" element={<Protegida perfil={Sindico}><Reportes /></Protegida>} />
         <Route path="/sou-morador" element={<EncontrarCondominio />} />
         <Route path="/ativar-notificacoes" element={<AtivarPush />} />
         <Route path="/recuperar" element={<Recuperar />} />

@@ -11,6 +11,7 @@ export function ShellSindico({ children }: { children: ReactNode }) {
     ['/painel/blocos', 'Blocos'],
     ['/painel/moradores', 'Moradores'],
     ['/painel/timeline', 'Timeline'],
+    ['/painel/reportes', 'Reportes'],
     ['/painel/areas', 'Áreas'],
     ['/painel/identidade', 'Identidade'],
     ['/painel/qr', 'QR Codes'],
