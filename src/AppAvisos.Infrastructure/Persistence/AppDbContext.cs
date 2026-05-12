@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
     public DbSet<Reporte> Reportes => Set<Reporte>();
     public DbSet<HistoricoReporte> HistoricosReporte => Set<HistoricoReporte>();
+    public DbSet<CanalReporte> CanaisReporte => Set<CanalReporte>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -117,6 +118,16 @@ public class AppDbContext : DbContext
             e.Property(x => x.AutorNome).HasMaxLength(160);
             e.Property(x => x.AutorPerfil).HasMaxLength(40);
             e.HasOne(x => x.Reporte).WithMany().HasForeignKey(x => x.ReporteId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<CanalReporte>(e =>
+        {
+            e.HasIndex(x => x.Token).IsUnique();
+            e.HasIndex(x => new { x.CondominioId, x.Ativo });
+            e.Property(x => x.Nome).HasMaxLength(120).IsRequired();
+            e.Property(x => x.Token).HasMaxLength(20).IsRequired();
+            e.HasOne(x => x.Condominio).WithMany().HasForeignKey(x => x.CondominioId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Area).WithMany().HasForeignKey(x => x.AreaId).OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

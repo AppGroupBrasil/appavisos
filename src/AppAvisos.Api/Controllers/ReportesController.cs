@@ -23,7 +23,7 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
     string AppUrl => cfg["AppUrl"] ?? "https://app.appavisos.com.br";
 
     [HttpGet("publico/reportes/{slug}/config")]
-    public async Task<IActionResult> Config(string slug)
+    public async Task<IActionResult> Config(string slug, [FromQuery] string? canal)
     {
         var cond = await db.Condominios.AsNoTracking().Where(c => c.Slug == slug && !c.Bloqueado)
             .Select(c => new { c.Id, c.Nome, c.LogoUrl, c.CorPrimaria, c.IdentificacaoObrigatoria })
@@ -31,13 +31,29 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
         if (cond is null) return NotFound();
         var areas = await db.Areas.AsNoTracking().Where(a => a.CondominioId == cond.Id)
             .OrderBy(a => a.Ordem).Select(a => new { a.Id, a.Nome }).ToListAsync();
+
+        if (!string.IsNullOrEmpty(canal))
+        {
+            var c = await db.CanaisReporte.AsNoTracking().Include(x => x.Area)
+                .FirstOrDefaultAsync(x => x.Token == canal && x.CondominioId == cond.Id && x.Ativo);
+            if (c is null) return NotFound(new { erro = "Canal não encontrado ou desativado" });
+            return Ok(new
+            {
+                cond.Nome, cond.LogoUrl, cond.CorPrimaria,
+                identificacaoObrigatoria = c.IdentificacaoObrigatoria,
+                canalNome = c.Nome, canalDescricao = c.Descricao,
+                canalAreaId = c.AreaId, canalAreaNome = c.Area?.Nome,
+                areas
+            });
+        }
+
         return Ok(new { cond.Nome, cond.LogoUrl, cond.CorPrimaria, cond.IdentificacaoObrigatoria, areas });
     }
 
     public record CriarReporteReq(
         string Categoria, string Titulo, string Descricao, List<string>? Fotos,
         string? Nome, string? Bloco, string? Apartamento, string? Telefone, string? Email,
-        Guid? AreaId);
+        Guid? AreaId, string? Canal);
 
     [HttpPost("publico/reportes/{slug}")]
     [EnableRateLimiting("auth")]
@@ -47,7 +63,18 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
         if (cond is null) return NotFound();
         if (string.IsNullOrWhiteSpace(req.Titulo) || string.IsNullOrWhiteSpace(req.Descricao))
             return BadRequest(new { erro = "Título e descrição são obrigatórios" });
-        if (cond.IdentificacaoObrigatoria
+
+        var identifObrig = cond.IdentificacaoObrigatoria;
+        Guid? areaId = req.AreaId;
+        if (!string.IsNullOrEmpty(req.Canal))
+        {
+            var canal = await db.CanaisReporte.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Token == req.Canal && x.CondominioId == cond.Id && x.Ativo);
+            if (canal is null) return BadRequest(new { erro = "Canal inválido" });
+            identifObrig = canal.IdentificacaoObrigatoria;
+            areaId ??= canal.AreaId;
+        }
+        if (identifObrig
             && (string.IsNullOrWhiteSpace(req.Nome) || string.IsNullOrWhiteSpace(req.Apartamento)))
             return BadRequest(new { erro = "Nome e apartamento são obrigatórios" });
 
@@ -65,7 +92,7 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
         {
             Protocolo = protocolo,
             CondominioId = cond.Id,
-            AreaId = req.AreaId,
+            AreaId = areaId,
             Categoria = categoria,
             Titulo = req.Titulo.Trim(),
             Descricao = req.Descricao.Trim(),

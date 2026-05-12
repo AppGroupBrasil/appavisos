@@ -9,6 +9,10 @@ type Config = {
   corPrimaria?: string | null
   identificacaoObrigatoria: boolean
   areas: { id: string; nome: string }[]
+  canalNome?: string | null
+  canalDescricao?: string | null
+  canalAreaId?: string | null
+  canalAreaNome?: string | null
 }
 
 const CATEGORIAS = [
@@ -20,7 +24,7 @@ const CATEGORIAS = [
 ]
 
 export default function Reportar() {
-  const { slug } = useParams()
+  const { slug, canal } = useParams()
   const [params] = useSearchParams()
   const areaPreId = params.get('area')
   const [cfg, setCfg] = useState<Config | null>(null)
@@ -40,10 +44,16 @@ export default function Reportar() {
   const inputFile = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    api.get(`/api/publico/reportes/${slug}/config`)
-      .then(r => setCfg(r.data))
-      .catch(() => setErro('Condomínio não encontrado'))
-  }, [slug])
+    const url = canal
+      ? `/api/publico/reportes/${slug}/config?canal=${canal}`
+      : `/api/publico/reportes/${slug}/config`
+    api.get(url)
+      .then(r => {
+        setCfg(r.data)
+        if (r.data.canalAreaId) setAreaId(r.data.canalAreaId)
+      })
+      .catch(() => setErro('Condomínio ou canal não encontrado'))
+  }, [slug, canal])
 
   async function adicionarFoto(files: FileList | null) {
     if (!files || files.length === 0) return
@@ -74,7 +84,8 @@ export default function Reportar() {
       const r = await api.post(`/api/publico/reportes/${slug}`, {
         categoria, areaId: areaId || null, titulo, descricao, fotos,
         nome: nome || null, bloco: bloco || null, apartamento: apto || null,
-        telefone: tel || null, email: emailMor || null
+        telefone: tel || null, email: emailMor || null,
+        canal: canal || null
       })
       setSucesso({ link: r.data.linkPublico, protocolo: r.data.protocolo })
     } catch (e: any) {
@@ -108,7 +119,9 @@ export default function Reportar() {
         <div className="text-center mb-6">
           {cfg.logoUrl && <img src={cfg.logoUrl} alt="" className="h-12 mx-auto mb-2" />}
           <h1 className="text-xl font-bold">{cfg.nome}</h1>
-          <p className="text-sm text-slate-500">Reportar para o síndico</p>
+          <p className="text-sm text-slate-500">{cfg.canalNome ?? 'Reportar para o síndico'}</p>
+          {cfg.canalDescricao && <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">{cfg.canalDescricao}</p>}
+          {cfg.canalAreaNome && <p className="text-xs text-slate-400 mt-1">Área: {cfg.canalAreaNome}</p>}
         </div>
 
         <Card className="p-5 space-y-4">

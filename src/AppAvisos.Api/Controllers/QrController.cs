@@ -72,6 +72,17 @@ public class QrController(AppDbContext db, CurrentUser user, IConfiguration cfg)
         return File(GerarPng($"{BaseUrl}/c/{data.CondSlug}/reportar?area={data.Id}", tamanho), "image/png");
     }
 
+    [HttpGet("canal/{id:guid}.png")]
+    [Authorize(Roles = "Sindico,Subsindico")]
+    public async Task<IActionResult> QrCanal(Guid id, [FromQuery] int tamanho = 12)
+    {
+        var data = await db.CanaisReporte.AsNoTracking().Include(c => c.Condominio)
+            .Where(c => c.Id == id && c.CondominioId == user.CondominioId)
+            .Select(c => new { c.Token, CondSlug = c.Condominio.Slug }).FirstOrDefaultAsync();
+        if (data is null) return NotFound();
+        return File(GerarPng($"{BaseUrl}/c/{data.CondSlug}/reportar/{data.Token}", tamanho), "image/png");
+    }
+
     [HttpGet("/q/{token}")]
     public async Task<IActionResult> Resolver(string token)
     {
