@@ -35,8 +35,11 @@ if (string.IsNullOrWhiteSpace(jwtKey) || jwtKey.Length < 32)
 builder.Services.Configure<ForwardedHeadersOptions>(o =>
 {
     o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+    o.ForwardLimit = 2;
     o.KnownNetworks.Clear();
     o.KnownProxies.Clear();
+    o.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(System.Net.IPAddress.Parse("0.0.0.0"), 0));
+    o.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(System.Net.IPAddress.IPv6Any, 0));
 });
 
 builder.Services.AddControllers();
@@ -49,9 +52,15 @@ builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>("postgres", t
 builder.Services.AddRateLimiter(o =>
 {
     o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    static string ClientIp(HttpContext ctx)
+    {
+        var xff = ctx.Request.Headers["X-Forwarded-For"].ToString();
+        if (!string.IsNullOrEmpty(xff))
+            return xff.Split(',')[0].Trim();
+        return ctx.Connection.RemoteIpAddress?.ToString() ?? "anon";
+    }
     o.AddPolicy("auth", ctx =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            ctx.Connection.RemoteIpAddress?.ToString() ?? "anon",
+        RateLimitPartition.GetFixedWindowLimiter(ClientIp(ctx),
             _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
 });
 
