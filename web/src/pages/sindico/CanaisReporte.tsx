@@ -113,8 +113,8 @@ export default function CanaisReporte() {
 
       {edit && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setEdit(null)}>
-          <Card className="max-w-lg w-full p-6" onClick={() => {}}>
-            <div onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-xl border border-slate-200 max-w-lg w-full p-6" onClick={e => e.stopPropagation()}>
+            <div>
               <h2 className="text-lg font-bold mb-4">{edit.id ? 'Editar canal' : 'Novo canal'}</h2>
               <div className="space-y-4">
                 <div>
@@ -161,7 +161,7 @@ export default function CanaisReporte() {
                 </Button>
               </div>
             </div>
-          </Card>
+          </div>
         </div>
       )}
     </ShellSindico>
