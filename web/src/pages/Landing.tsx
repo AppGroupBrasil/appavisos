@@ -45,6 +45,7 @@ export default function Landing() {
           <div className="font-bold text-lg">AppAvisos</div>
           <nav className="flex items-center gap-2 sm:gap-4 text-sm">
             <a href="#funcionalidades" className="hidden sm:inline text-slate-600 hover:text-slate-900">Funcionalidades</a>
+            <a href="#qrcodes" className="hidden sm:inline text-slate-600 hover:text-slate-900">QR Codes</a>
             <a href="#planos" className="hidden sm:inline text-slate-600 hover:text-slate-900">Planos</a>
             <Link to="/login" className="text-slate-700 hover:text-slate-900">Entrar</Link>
             <Link to="/cadastrar-condominio" className="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-800">
@@ -90,7 +91,44 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="planos" className="px-4 py-16">
+      <section id="qrcodes" className="px-4 py-16">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-10 items-center">
+          <div>
+            <div className="inline-block text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
+              Exclusivo
+            </div>
+            <h2 className="mt-4 text-3xl font-bold">QR Codes para tudo no condomínio</h2>
+            <p className="mt-4 text-slate-600">
+              Cada QR Code é um canal direto entre morador e síndico. Cole na portaria, no elevador, na academia,
+              no salão de festas — onde fizer sentido. O morador escaneia, registra a ocorrência com foto e descrição,
+              e o síndico recebe na hora.
+            </p>
+            <ul className="mt-6 space-y-3 text-sm">
+              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Permanente</b> — fixo em áreas comuns (portaria, elevador, garagem) para uso contínuo.</span></li>
+              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Provisório</b> — válido por tempo determinado (obra, evento, manutenção pontual).</span></li>
+              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Por área ou setor</b> — academia, piscina, salão de festas, bloco específico.</span></li>
+              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Ocorrências e manutenção</b> — morador abre chamado com foto e descrição do problema.</span></li>
+              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Resposta direta</b> — síndico responde por e-mail ou WhatsApp do morador, em 1 clique.</span></li>
+            </ul>
+            <Link to="/cadastrar-condominio" className="mt-8 inline-block bg-slate-900 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-800">
+              Quero usar no meu condomínio
+            </Link>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+            <div className="aspect-square bg-slate-50 rounded-xl flex items-center justify-center">
+              <svg viewBox="0 0 100 100" className="w-3/4 h-3/4 text-slate-900" fill="currentColor" aria-hidden="true">
+                <path d="M0 0h30v30H0zm5 5v20h20V5zm5 5h10v10H10zM70 0h30v30H70zm5 5v20h20V5zm5 5h10v10H80zM0 70h30v30H0zm5 5v20h20V75zm5 5h10v10H10zM40 0h10v10H40zM50 10h10v10H50zM40 20h10v10H40zM60 20h10v10H60zM40 40h10v10H40zM50 50h10v10H50zM60 40h10v10H60zM70 50h10v10H70zM80 40h10v10H80zM90 50h10v10H90zM40 60h10v10H40zM60 60h10v10H60zM80 60h10v10H80zM50 70h10v10H50zM70 70h10v10H70zM90 70h10v10H90zM40 80h10v10H40zM60 80h10v10H60zM80 80h10v10H80zM50 90h10v10H50zM70 90h10v10H70zM90 90h10v10H90z" />
+              </svg>
+            </div>
+            <div className="mt-4 text-center">
+              <div className="font-semibold">Academia · Bloco A</div>
+              <div className="text-xs text-slate-500 mt-1">Reporte um problema · Solicite manutenção</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="planos" className="px-4 py-16 bg-white border-t border-slate-200">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-2">Planos simples</h2>
           <p className="text-center text-slate-600 mb-12">Sem fidelidade. Sem taxa de instalação.</p>
