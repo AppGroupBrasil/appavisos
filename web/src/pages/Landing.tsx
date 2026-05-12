@@ -98,13 +98,8 @@ export default function Landing() {
             {planos.map((p) => (
               <div
                 key={p.nome}
-                className={`relative bg-white border rounded-2xl p-6 ${p.destaque ? 'border-slate-900 shadow-lg md:scale-105' : 'border-slate-200'}`}
+                className="bg-white border border-slate-200 rounded-2xl p-6"
               >
-                {p.destaque && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                    Mais escolhido
-                  </div>
-                )}
                 <div className="text-lg font-semibold">{p.nome}</div>
                 <div className="text-sm text-slate-500">{p.sub}</div>
                 <div className="mt-4 flex items-baseline gap-1">
@@ -124,7 +119,7 @@ export default function Landing() {
                   href={wppLink(`Olá! Quero contratar o plano ${p.nome} (R$${p.preco}/mês).`)}
                   target="_blank"
                   rel="noreferrer"
-                  className={`mt-6 block text-center px-4 py-3 rounded-lg font-semibold ${p.destaque ? 'bg-slate-900 text-white hover:bg-slate-800' : 'bg-slate-100 text-slate-900 hover:bg-slate-200'}`}
+                  className="mt-6 block text-center px-4 py-3 rounded-lg font-semibold bg-slate-900 text-white hover:bg-slate-800"
                 >
                   Contratar
                 </a>
