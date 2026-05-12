@@ -46,6 +46,7 @@ services:
       Vapid__PrivateKey: ${VAPID_PRIVATE}
     volumes:
       - appavisos_uploads:/app/uploads
+      - appavisos_logs:/app/logs
     networks:
       - appavisos_internal
       - coolify
@@ -105,6 +106,7 @@ services:
 volumes:
   appavisos_postgres:
   appavisos_uploads:
+  appavisos_logs:
 
 networks:
   appavisos_internal:
