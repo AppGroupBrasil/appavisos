@@ -4,7 +4,7 @@ const WHATS = '5511933284364'
 const wppLink = (msg: string) => `https://wa.me/${WHATS}?text=${encodeURIComponent(msg)}`
 
 const features = [
-  { titulo: 'Avisos por e-mail e push', desc: 'Envio automático para todos os moradores, com confirmação de leitura e ciência.' },
+  { titulo: 'Avisos por e-mail, push e WhatsApp', desc: 'Envio automático por e-mail e push, e envio manual em 1 clique via link do WhatsApp. Com confirmação de leitura e ciência.' },
   { titulo: 'Multi-bloco e multi-área', desc: 'Avisos segmentados por bloco, torre ou área de lazer. Cada morador vê apenas o que importa.' },
   { titulo: 'Cadastro por QR Code', desc: 'Imprima o QR e cole no elevador. Morador cadastra em 30 segundos pelo celular.' },
   { titulo: 'Recibos e rastreio', desc: 'Veja quem abriu o e-mail, quem deu ciência e quem respondeu — em tempo real.' },
