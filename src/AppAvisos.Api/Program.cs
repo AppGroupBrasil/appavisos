@@ -54,14 +54,15 @@ builder.Services.AddRateLimiter(o =>
     o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     static string ClientIp(HttpContext ctx)
     {
+        var cf = ctx.Request.Headers["CF-Connecting-IP"].ToString();
+        if (!string.IsNullOrEmpty(cf)) return cf.Trim();
         var xff = ctx.Request.Headers["X-Forwarded-For"].ToString();
-        if (!string.IsNullOrEmpty(xff))
-            return xff.Split(',')[0].Trim();
+        if (!string.IsNullOrEmpty(xff)) return xff.Split(',')[0].Trim();
         return ctx.Connection.RemoteIpAddress?.ToString() ?? "anon";
     }
     o.AddPolicy("auth", ctx =>
         RateLimitPartition.GetFixedWindowLimiter(ClientIp(ctx),
-            _ => new FixedWindowRateLimiterOptions { PermitLimit = 2, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
 });
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
