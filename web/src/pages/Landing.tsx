@@ -107,8 +107,10 @@ export default function Landing() {
               <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Permanente</b> — fixo em áreas comuns (portaria, elevador, garagem) para uso contínuo.</span></li>
               <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Provisório</b> — válido por tempo determinado (obra, evento, manutenção pontual).</span></li>
               <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Por área ou setor</b> — academia, piscina, salão de festas, bloco específico.</span></li>
-              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Ocorrências e manutenção</b> — morador abre chamado com foto e descrição do problema.</span></li>
-              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Resposta direta</b> — síndico responde por e-mail ou WhatsApp do morador, em 1 clique.</span></li>
+              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>5 categorias</b> — ocorrência, manutenção, reclamação, sugestão ou outro, em um dropdown simples.</span></li>
+              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Foto + descrição</b> — morador anexa até 5 fotos (galeria ou câmera) com título e descrição.</span></li>
+              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Identificação configurável</b> — síndico decide se nome e apartamento são obrigatórios ou opcionais.</span></li>
+              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Resposta, PDF e link público</b> — síndico responde por e-mail/WhatsApp em 1 clique, gera PDF e compartilha o link da ocorrência.</span></li>
             </ul>
             <Link to="/cadastrar-condominio" className="mt-8 inline-block bg-slate-900 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-800">
               Quero usar no meu condomínio
