@@ -12,7 +12,7 @@ const features = [
   { titulo: 'Painel do síndico', desc: 'Criação de avisos em segundos. Anexos, urgência, validade e agendamento.' },
   { titulo: 'Identidade do condomínio', desc: 'Logo, cor e nome do seu condomínio em todos os e-mails e telas.' },
   { titulo: 'Importação em massa', desc: 'Suba a planilha com seus moradores e blocos. Pronto em minutos.' },
-  { titulo: 'App opcional para o morador', desc: 'O morador não precisa baixar nada — recebe os avisos direto no e-mail e no WhatsApp. Se quiser, instala o app no celular para consultar o histórico, respostas e todos os avisos a qualquer hora.' },
+  { titulo: 'Notificações sem instalar app', desc: 'O morador clica no link de "Ativar notificações" e o próprio navegador pede a autorização (1 clique). A partir daí, recebe os avisos como notificação no celular mesmo com o site fechado — igual portais de notícia. Sem app, sem loja, sem PWA.' },
   { titulo: 'LGPD e segurança', desc: 'Senhas criptografadas, JWT, backup diário e isolamento por condomínio.' },
 ]
 

@@ -51,7 +51,8 @@ public static class EmailTemplates
 </tr></table>
 </td></tr>
 <tr><td style='padding:24px;background:#F8FAFC;border-top:1px solid #E2E8F0;text-align:center;'>
-<a href='{ativarPushUrl}' style='display:inline-block;padding:10px 20px;background:#fff;border:1px solid #E2E8F0;border-radius:8px;text-decoration:none;color:#0F172A;font-size:14px;'>📱 Receber estes avisos como notificação no celular</a>
+<a href='{ativarPushUrl}' style='display:inline-block;padding:12px 24px;background:#0F172A;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;'>🔔 Ativar notificações no celular (sem instalar app)</a>
+<div style='margin-top:10px;color:#64748B;font-size:12px;'>1 clique no navegador. Funciona como sites de notícias.</div>
 <div style='margin-top:16px;color:#94A3B8;font-size:12px;'>
 {System.Net.WebUtility.HtmlEncode(cond.Nome)}{(string.IsNullOrEmpty(cond.TelefoneContato) ? "" : $" • {cond.TelefoneContato}")}{(string.IsNullOrEmpty(cond.EmailContato) ? "" : $" • {cond.EmailContato}")}
 <br/><a href='{descadastroUrl}' style='color:#94A3B8;'>Descadastrar e-mail</a>

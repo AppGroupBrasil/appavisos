@@ -76,7 +76,8 @@ export default function NovoAviso() {
       if (viaWhatsapp && moradorSelecionado?.telefone) {
         const tel = moradorSelecionado.telefone.replace(/\D/g, '')
         const tipoLabel = TIPOS.find((t) => t.v === f.tipo)?.l ?? 'Aviso'
-        const msg = `*${tipoLabel}: ${f.titulo}*\n\n${f.texto}`
+        const origin = window.location.origin
+        const msg = `*${tipoLabel}: ${f.titulo}*\n\n${f.texto}\n\n🔔 Ative as notificações para receber direto no celular (sem instalar app):\n${origin}/ativar-notificacoes`
         window.open(`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`, '_blank')
       }
       void data

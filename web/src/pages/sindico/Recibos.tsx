@@ -28,7 +28,9 @@ export default function Recibos() {
   function whatsapp(r: Recibo) {
     if (!r.telefone) return alert('Sem telefone cadastrado')
     const tel = r.telefone.replace(/\D/g, '')
-    window.open(`https://wa.me/55${tel}?text=${encodeURIComponent('Olá! Você recebeu um aviso do condomínio. Por favor, confirme a leitura.')}`, '_blank')
+    const origin = window.location.origin
+    const msg = `Olá! Você recebeu um aviso do condomínio. Por favor, confirme a leitura.\n\n🔔 Ative as notificações para receber direto no celular (sem instalar app):\n${origin}/ativar-notificacoes`
+    window.open(`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`, '_blank')
   }
 
   return (
