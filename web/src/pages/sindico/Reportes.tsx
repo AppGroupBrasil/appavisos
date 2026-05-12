@@ -36,8 +36,16 @@ type Detalhe = {
   respondidoEm?: string
   respondidoPor?: string
   fotos: string[]
+  historico: { status: string; autorNome: string; autorPerfil: string; observacao?: string; criadoEm: string }[]
   linkPublico: string
   linkPdf: string
+}
+
+const STATUS_LABEL: Record<string, { txt: string; cls: string }> = {
+  Aberto: { txt: 'Aberto', cls: 'bg-amber-100 text-amber-800' },
+  EmExecucao: { txt: 'Em execução', cls: 'bg-blue-100 text-blue-800' },
+  Finalizado: { txt: 'Finalizado', cls: 'bg-emerald-100 text-emerald-800' },
+  Arquivado: { txt: 'Arquivado', cls: 'bg-slate-200 text-slate-700' },
 }
 
 const CAT_LABELS: Record<string, string> = {
@@ -78,6 +86,15 @@ export default function Reportes() {
     } finally { setEnviando(false) }
   }
 
+  async function mudarStatus(status: string) {
+    if (!aberto) return
+    const obs = window.prompt(`Observação para "${STATUS_LABEL[status]?.txt}" (opcional):`, '')
+    if (obs === null) return
+    await api.post(`/api/reportes/${aberto.id}/status`, { status, observacao: obs || null })
+    await carregar()
+    await abrir(aberto.id)
+  }
+
   const wppLink = (tel: string, texto: string) =>
     `https://wa.me/55${tel.replace(/\D/g, '')}?text=${encodeURIComponent(texto)}`
 
@@ -89,7 +106,8 @@ export default function Reportes() {
           <select value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)} className="px-2 py-1 border rounded">
             <option value="">Todos status</option>
             <option value="Aberto">Aberto</option>
-            <option value="Respondido">Respondido</option>
+            <option value="EmExecucao">Em execução</option>
+            <option value="Finalizado">Finalizado</option>
             <option value="Arquivado">Arquivado</option>
           </select>
           <select value={filtroCat} onChange={e => setFiltroCat(e.target.value)} className="px-2 py-1 border rounded">
@@ -112,8 +130,7 @@ export default function Reportes() {
                       <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-900 text-white">
                         {CAT_LABELS[r.categoria] ?? r.categoria}
                       </span>
-                      {r.status === 'Aberto' && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Aberto</span>}
-                      {r.status === 'Respondido' && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Respondido</span>}
+                      {STATUS_LABEL[r.status] && <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_LABEL[r.status].cls}`}>{STATUS_LABEL[r.status].txt}</span>}
                       {r.temFotos && <span className="text-xs text-slate-500">📷</span>}
                       <span className="text-xs text-slate-400 font-mono">#{r.protocolo}</span>
                     </div>
@@ -167,6 +184,30 @@ export default function Reportes() {
                 {aberto.email && <div className="text-slate-600">{aberto.email}</div>}
               </div>
             )}
+
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_LABEL[aberto.status]?.cls}`}>{STATUS_LABEL[aberto.status]?.txt}</span>
+                <span className="text-xs text-slate-500">Mudar para:</span>
+                {aberto.status !== 'EmExecucao' && <button onClick={() => mudarStatus('EmExecucao')} className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800 hover:bg-blue-200">Em execução</button>}
+                {aberto.status !== 'Finalizado' && <button onClick={() => mudarStatus('Finalizado')} className="text-xs px-2 py-1 rounded bg-emerald-100 text-emerald-800 hover:bg-emerald-200">Finalizado</button>}
+                {aberto.status !== 'Arquivado' && <button onClick={() => mudarStatus('Arquivado')} className="text-xs px-2 py-1 rounded bg-slate-200 text-slate-700 hover:bg-slate-300">Arquivar</button>}
+              </div>
+              {aberto.historico?.length > 0 && (
+                <details className="mt-2 text-sm">
+                  <summary className="cursor-pointer text-slate-600">Histórico ({aberto.historico.length})</summary>
+                  <ol className="mt-2 border-l-2 border-slate-200 pl-3 space-y-2">
+                    {aberto.historico.map((h, i) => (
+                      <li key={i} className="text-xs">
+                        <span className={`inline-block px-2 py-0.5 rounded-full font-semibold ${STATUS_LABEL[h.status]?.cls}`}>{STATUS_LABEL[h.status]?.txt}</span>
+                        <span className="ml-2 text-slate-600">{h.autorNome} ({h.autorPerfil}) — {new Date(h.criadoEm).toLocaleString('pt-BR')}</span>
+                        {h.observacao && <div className="text-slate-700 mt-0.5">{h.observacao}</div>}
+                      </li>
+                    ))}
+                  </ol>
+                </details>
+              )}
+            </div>
 
             <div className="flex gap-2 mb-4 flex-wrap">
               <a href={aberto.linkPdf} target="_blank" rel="noreferrer">

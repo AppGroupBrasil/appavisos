@@ -77,6 +77,14 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
             Email = req.Email?.Trim().ToLowerInvariant()
         };
         db.Reportes.Add(r);
+        db.HistoricosReporte.Add(new HistoricoReporte
+        {
+            ReporteId = r.Id,
+            Status = StatusReporte.Aberto,
+            AutorNome = r.Nome ?? "Anônimo",
+            AutorPerfil = "Morador",
+            Observacao = "Protocolo aberto"
+        });
         await db.SaveChangesAsync();
         return Ok(new { id = r.Id, protocolo = r.Protocolo, token = r.TokenPublico, linkPublico = $"{AppUrl}/r/{r.TokenPublico}" });
     }
@@ -128,12 +136,17 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
             .FirstOrDefaultAsync(x => x.Id == id && x.CondominioId == user.CondominioId);
         if (r is null) return NotFound();
         var fotos = JsonSerializer.Deserialize<List<string>>(r.FotosJson) ?? new();
+        var historico = await db.HistoricosReporte.AsNoTracking()
+            .Where(h => h.ReporteId == r.Id).OrderBy(h => h.CriadoEm)
+            .Select(h => new { h.Status, h.AutorNome, h.AutorPerfil, h.Observacao, h.CriadoEm })
+            .ToListAsync();
         return Ok(new
         {
             r.Id, r.Protocolo, r.Categoria, r.Titulo, r.Descricao, r.Status,
             r.Nome, r.Bloco, r.Apartamento, r.Telefone, r.Email,
             area = r.Area?.Nome, r.CriadoEm, r.Resposta, r.RespondidoEm, r.RespondidoPor,
-            fotos, linkPublico = $"{AppUrl}/r/{r.TokenPublico}",
+            fotos, historico,
+            linkPublico = $"{AppUrl}/r/{r.TokenPublico}",
             linkPdf = $"{AppUrl}/api/reportes/{r.Id}/pdf"
         });
     }
@@ -147,10 +160,20 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
         if (string.IsNullOrWhiteSpace(req.Resposta)) return BadRequest(new { erro = "Resposta vazia" });
         var r = await db.Reportes.Include(x => x.Condominio).FirstOrDefaultAsync(x => x.Id == id && x.CondominioId == user.CondominioId);
         if (r is null) return NotFound();
+        var statusAnterior = r.Status;
         r.Resposta = req.Resposta.Trim();
         r.RespondidoEm = DateTime.UtcNow;
         r.RespondidoPor = (await db.Usuarios.FindAsync(user.UserId))?.Nome ?? "Síndico";
-        r.Status = StatusReporte.Respondido;
+        if (r.Status == StatusReporte.Aberto) r.Status = StatusReporte.EmExecucao;
+        if (r.Status != statusAnterior)
+        {
+            db.HistoricosReporte.Add(new HistoricoReporte
+            {
+                ReporteId = r.Id, Status = r.Status,
+                AutorNome = r.RespondidoPor!, AutorPerfil = user.Perfil ?? "Sindico",
+                Observacao = "Resposta enviada"
+            });
+        }
         await db.SaveChangesAsync();
 
         if (!string.IsNullOrEmpty(r.Email))
@@ -166,6 +189,29 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
             try { await email.EnviarAsync(r.Email, assunto, html); } catch { }
         }
         return Ok(new { r.Id, r.Status, r.RespondidoEm });
+    }
+
+    public record MudarStatusReq(string Status, string? Observacao);
+
+    [HttpPost("reportes/{id:guid}/status")]
+    [Authorize(Roles = "Sindico,Subsindico")]
+    public async Task<IActionResult> MudarStatus(Guid id, MudarStatusReq req)
+    {
+        if (!Enum.TryParse<StatusReporte>(req.Status, true, out var novo))
+            return BadRequest(new { erro = "Status inválido" });
+        var r = await db.Reportes.FirstOrDefaultAsync(x => x.Id == id && x.CondominioId == user.CondominioId);
+        if (r is null) return NotFound();
+        if (r.Status == novo) return NoContent();
+        r.Status = novo;
+        var autor = (await db.Usuarios.FindAsync(user.UserId))?.Nome ?? "Síndico";
+        db.HistoricosReporte.Add(new HistoricoReporte
+        {
+            ReporteId = r.Id, Status = novo,
+            AutorNome = autor, AutorPerfil = user.Perfil ?? "Sindico",
+            Observacao = req.Observacao?.Trim()
+        });
+        await db.SaveChangesAsync();
+        return Ok(new { r.Status });
     }
 
     [HttpGet("reportes/{id:guid}/pdf")]
@@ -196,11 +242,16 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
         var r = await db.Reportes.AsNoTracking().Include(x => x.Area).Include(x => x.Condominio)
             .FirstOrDefaultAsync(x => x.Protocolo == numero);
         if (r is null) return NotFound(new { erro = "Protocolo não encontrado" });
+        var historico = await db.HistoricosReporte.AsNoTracking()
+            .Where(h => h.ReporteId == r.Id).OrderBy(h => h.CriadoEm)
+            .Select(h => new { status = h.Status.ToString(), h.AutorNome, h.AutorPerfil, h.Observacao, h.CriadoEm })
+            .ToListAsync();
         return Ok(new
         {
-            r.Protocolo, r.Titulo, r.Status, categoria = r.Categoria.ToString(),
+            r.Protocolo, r.Titulo, status = r.Status.ToString(), categoria = r.Categoria.ToString(),
             area = r.Area?.Nome, condominio = r.Condominio.Nome,
             r.CriadoEm, r.Resposta, r.RespondidoEm, r.RespondidoPor,
+            historico,
             linkCompleto = $"{AppUrl}/r/{r.TokenPublico}"
         });
     }
@@ -208,6 +259,8 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
     string RenderHtml(Reporte r)
     {
         var fotos = JsonSerializer.Deserialize<List<string>>(r.FotosJson) ?? new();
+        var historico = db.HistoricosReporte.AsNoTracking()
+            .Where(h => h.ReporteId == r.Id).OrderBy(h => h.CriadoEm).ToList();
         var sb = new StringBuilder();
         var cat = r.Categoria switch
         {
@@ -262,6 +315,26 @@ h1 {{ font-size: 22px; margin: 0 0 4px }}
         {
             sb.Append($@"<div class='resp'><b>Resposta do síndico</b><div style='margin-top:6px'>{System.Net.WebUtility.HtmlEncode(r.Resposta).Replace("\n", "<br/>")}</div>
 <div style='color:#64748B;font-size:12px;margin-top:8px'>— {System.Net.WebUtility.HtmlEncode(r.RespondidoPor ?? "")}, {r.RespondidoEm:dd/MM/yyyy HH:mm}</div></div>");
+        }
+        if (historico.Count > 0)
+        {
+            sb.Append("<div class='box'><b>Histórico</b><div style='margin-top:8px;border-left:2px solid #E2E8F0;padding-left:14px'>");
+            foreach (var h in historico)
+            {
+                var st = h.Status switch
+                {
+                    StatusReporte.Aberto => ("Aberto", "#F59E0B"),
+                    StatusReporte.EmExecucao => ("Em execução", "#3B82F6"),
+                    StatusReporte.Finalizado => ("Finalizado", "#10B981"),
+                    _ => ("Arquivado", "#64748B")
+                };
+                sb.Append($@"<div style='margin-bottom:10px;position:relative'>
+<span style='display:inline-block;padding:2px 8px;border-radius:999px;background:{st.Item2};color:#fff;font-size:11px;font-weight:600'>{st.Item1}</span>
+<div style='font-size:13px;margin-top:4px'>{System.Net.WebUtility.HtmlEncode(h.AutorNome)} ({System.Net.WebUtility.HtmlEncode(h.AutorPerfil)}) — {h.CriadoEm:dd/MM/yyyy HH:mm}</div>
+{(string.IsNullOrEmpty(h.Observacao) ? "" : $"<div style='font-size:13px;color:#475569'>{System.Net.WebUtility.HtmlEncode(h.Observacao)}</div>")}
+</div>");
+            }
+            sb.Append("</div></div>");
         }
         sb.Append("</body></html>");
         return sb.ToString();

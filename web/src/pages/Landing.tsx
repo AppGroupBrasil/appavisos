@@ -50,7 +50,15 @@ type Consulta = {
   resposta?: string | null
   respondidoEm?: string | null
   respondidoPor?: string | null
+  historico?: { status: string; autorNome: string; autorPerfil: string; observacao?: string; criadoEm: string }[]
   linkCompleto: string
+}
+
+const STATUS_CLR: Record<string, { txt: string; cls: string }> = {
+  Aberto: { txt: 'Aberto', cls: 'bg-amber-100 text-amber-800' },
+  EmExecucao: { txt: 'Em execução', cls: 'bg-blue-100 text-blue-800' },
+  Finalizado: { txt: 'Finalizado', cls: 'bg-emerald-100 text-emerald-800' },
+  Arquivado: { txt: 'Arquivado', cls: 'bg-slate-200 text-slate-700' },
 }
 
 function ConsultaProtocolo() {
@@ -72,10 +80,7 @@ function ConsultaProtocolo() {
     } finally { setCarregando(false) }
   }
 
-  const statusLabel = (s: string) =>
-    s === 'Aberto' ? { txt: 'Em análise', cls: 'bg-amber-100 text-amber-800' }
-    : s === 'Respondido' ? { txt: 'Respondido', cls: 'bg-emerald-100 text-emerald-800' }
-    : { txt: 'Arquivado', cls: 'bg-slate-200 text-slate-700' }
+  const statusLabel = (s: string) => STATUS_CLR[s] ?? { txt: s, cls: 'bg-slate-100 text-slate-700' }
 
   return (
     <section id="protocolo" className="px-4 -mt-8 mb-12">
@@ -124,6 +129,20 @@ function ConsultaProtocolo() {
               </div>
             ) : (
               <div className="mt-3 text-sm text-slate-600">Aguardando resposta do síndico.</div>
+            )}
+            {r.historico && r.historico.length > 0 && (
+              <details className="mt-3 text-sm">
+                <summary className="cursor-pointer text-slate-700">Histórico ({r.historico.length})</summary>
+                <ol className="mt-2 border-l-2 border-slate-200 pl-3 space-y-2">
+                  {r.historico.map((h, i) => (
+                    <li key={i} className="text-xs">
+                      <span className={`inline-block px-2 py-0.5 rounded-full font-semibold ${statusLabel(h.status).cls}`}>{statusLabel(h.status).txt}</span>
+                      <span className="ml-2 text-slate-600">{h.autorNome} ({h.autorPerfil}) — {new Date(h.criadoEm).toLocaleString('pt-BR')}</span>
+                      {h.observacao && <div className="text-slate-700 mt-0.5">{h.observacao}</div>}
+                    </li>
+                  ))}
+                </ol>
+              </details>
             )}
             <a href={r.linkCompleto} target="_blank" rel="noreferrer" className="inline-block mt-3 text-xs text-slate-700 underline">
               Ver registro completo (com fotos)
