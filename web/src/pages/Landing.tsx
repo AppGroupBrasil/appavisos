@@ -6,16 +6,21 @@ const WHATS = '5511933284364'
 const wppLink = (msg: string) => `https://wa.me/${WHATS}?text=${encodeURIComponent(msg)}`
 
 const features = [
-  { titulo: 'Avisos por e-mail, push e WhatsApp', desc: 'Envio automático por e-mail e push, e envio manual em 1 clique via link do WhatsApp. Com confirmação de leitura e ciência.' },
-  { titulo: 'Avisos direcionados', desc: 'Envie para um morador, um bloco específico ou todo o condomínio. Segmente também por áreas de lazer e outras áreas — com QR Code permanente ou provisório, conforme a necessidade do síndico.' },
-  { titulo: 'Cadastro por QR Code', desc: 'Imprima o QR e cole no elevador. Morador cadastra em 30 segundos pelo celular.' },
-  { titulo: 'Recibos e rastreio', desc: 'Veja quem abriu o e-mail, quem deu ciência e quem respondeu — em tempo real.' },
-  { titulo: 'Timeline do condomínio', desc: 'Linha do tempo com todos os comunicados, ocorrências e respostas dos moradores.' },
-  { titulo: 'Painel do síndico', desc: 'Criação de avisos em segundos. Anexos, urgência, validade e agendamento.' },
-  { titulo: 'Identidade do condomínio', desc: 'Logo, cor e nome do seu condomínio em todos os e-mails e telas.' },
-  { titulo: 'Importação em massa', desc: 'Suba a planilha com seus moradores e blocos. Pronto em minutos.' },
-  { titulo: 'Notificações sem instalar app', desc: 'O morador clica no link de "Ativar notificações" e o próprio navegador pede a autorização (1 clique). A partir daí, recebe os avisos como notificação no celular mesmo com o site fechado — igual portais de notícia. Sem app, sem loja, sem PWA.' },
-  { titulo: 'LGPD e segurança', desc: 'Senhas criptografadas, JWT, backup diário e isolamento por condomínio.' },
+  { titulo: 'Avisos por e-mail, push e WhatsApp', desc: 'Envio automático por e-mail e push assim que o aviso é publicado, e envio manual em 1 clique pelo WhatsApp do morador. Todo aviso registra confirmação de leitura, ciência e resposta.' },
+  { titulo: 'Avisos direcionados', desc: 'Para um morador específico, um bloco inteiro, todo o condomínio ou uma área de lazer (academia, salão, piscina). QR Codes permanentes para uso contínuo ou provisórios para obras e eventos.' },
+  { titulo: 'Reportes com protocolo', desc: '5 categorias (ocorrência, manutenção, reclamação, sugestão, outro), upload de até 5 fotos (galeria ou câmera), título e descrição. Cada envio gera um protocolo único de 6 dígitos.' },
+  { titulo: 'Consulta pública por protocolo', desc: 'Morador acompanha o status do seu chamado direto na página inicial, digitando os 6 dígitos. Sem login, sem cadastro, sem senha — o protocolo já é a chave de acesso.' },
+  { titulo: 'Status com histórico auditável', desc: 'Aberto → Em execução → Finalizado, com registro automático de data, hora, autor e perfil em cada mudança. Histórico visível para morador e síndico.' },
+  { titulo: 'Identificação configurável', desc: 'O síndico decide se nome e apartamento são obrigatórios ou opcionais no formulário de reporte. Permite chamados anônimos quando necessário.' },
+  { titulo: 'Timeline unificada', desc: 'Linha do tempo com avisos e reportes juntos. Filtros por tipo, subtipo, data, protocolo e morador. Busca inteligente em títulos, textos e descrições.' },
+  { titulo: 'Relatórios em PDF', desc: 'Gere relatórios profissionais com os filtros aplicados em 1 clique. Layout A4, com cabeçalho, badges coloridos por status e listagem completa pronta para imprimir ou arquivar.' },
+  { titulo: 'Resposta + PDF + link público', desc: 'Síndico responde por e-mail ou WhatsApp em 1 clique. Cada reporte tem uma página pública compartilhável e PDF próprio para arquivamento.' },
+  { titulo: 'Recibos e rastreio em tempo real', desc: 'Para cada aviso enviado: quem abriu o e-mail, quem deu ciência, quem respondeu. Veja a entrega chegando, morador a morador.' },
+  { titulo: 'Cadastro por QR Code', desc: 'Imprima o QR e cole no elevador ou portaria. Morador cadastra em 30 segundos pelo celular e o síndico aprova.' },
+  { titulo: 'Painel completo do síndico', desc: 'Criação de avisos com anexos, urgência, validade e agendamento. Gestão de blocos, moradores, áreas e categorias. Importação em massa por planilha.' },
+  { titulo: 'Identidade do condomínio', desc: 'Logo, cor e nome do seu condomínio em todos os e-mails, no app e nas páginas públicas. Personalização completa.' },
+  { titulo: 'Notificações sem instalar app', desc: 'O morador clica em "Ativar notificações" e o próprio navegador pede a autorização (1 clique). A partir daí recebe push no celular mesmo com o site fechado, como portais de notícia. Sem app, sem loja, sem PWA.' },
+  { titulo: 'LGPD e segurança', desc: 'Senhas criptografadas (bcrypt), autenticação JWT, rate limiting em login, backup diário do banco e isolamento total por condomínio.' },
 ]
 
 const planos = [
