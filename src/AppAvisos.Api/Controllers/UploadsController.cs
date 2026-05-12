@@ -30,6 +30,21 @@ public class UploadsController(AppDbContext db, CurrentUser user, IWebHostEnviro
         return Ok(new { url });
     }
 
+    [HttpPost("documento")]
+    public async Task<IActionResult> EnviarDocumento(IFormFile file)
+    {
+        if (file is null || file.Length == 0) return BadRequest(new { erro = "Arquivo vazio" });
+        if (file.Length > 10 * 1024 * 1024) return BadRequest(new { erro = "Documento até 10MB" });
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!AnexosPermitidos.Contains(ext)) return BadRequest(new { erro = "Formato não permitido" });
+        var raiz = Path.Combine(env.ContentRootPath, "documentos", user.CondominioId!.Value.ToString());
+        Directory.CreateDirectory(raiz);
+        var nome = $"{Guid.NewGuid():N}{ext}";
+        await using (var fs = System.IO.File.Create(Path.Combine(raiz, nome)))
+            await file.CopyToAsync(fs);
+        return Ok(new { url = $"documento:{nome}", nome = file.FileName, tamanho = file.Length });
+    }
+
     [HttpPost("anexo")]
     public async Task<IActionResult> EnviarAnexo(IFormFile file)
     {

@@ -28,6 +28,8 @@ import Master from './pages/master/Master'
 import Reportar from './pages/Reportar'
 import Reportes from './pages/sindico/Reportes'
 import CanaisReporte from './pages/sindico/CanaisReporte'
+import DocumentosSindico from './pages/sindico/Documentos'
+import DocumentosPublico from './pages/morador/Documentos'
 
 function Protegida({ children, perfil }: { children: React.ReactNode; perfil?: string | string[] }) {
   const { user } = useAuth()
@@ -53,6 +55,8 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/c/:slug/reportar/:canal" element={<Reportar />} />
         <Route path="/painel/reportes" element={<Protegida perfil={Sindico}><Reportes /></Protegida>} />
         <Route path="/painel/canais-reporte" element={<Protegida perfil={Sindico}><CanaisReporte /></Protegida>} />
+        <Route path="/painel/documentos" element={<Protegida perfil={Sindico}><DocumentosSindico /></Protegida>} />
+        <Route path="/c/:slug/documentos" element={<DocumentosPublico />} />
         <Route path="/sou-morador" element={<EncontrarCondominio />} />
         <Route path="/ativar-notificacoes" element={<AtivarPush />} />
         <Route path="/recuperar" element={<Recuperar />} />

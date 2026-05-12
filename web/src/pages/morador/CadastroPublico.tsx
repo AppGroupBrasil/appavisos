@@ -8,7 +8,7 @@ type Info = { condominio: { id: string; nome: string; logoUrl?: string; descrica
 export default function CadastroPublico() {
   const { slug } = useParams()
   const [info, setInfo] = useState<Info | null>(null)
-  const [f, setF] = useState({ nome: '', email: '', telefone: '', blocoId: '', apartamento: '', senha: '' })
+  const [f, setF] = useState({ nome: '', email: '', telefone: '', blocoId: '', apartamento: '', senha: '', pin: '' })
   const [erro, setErro] = useState(''); const [ok, setOk] = useState(false); const [loading, setLoading] = useState(false)
 
   useEffect(() => { api.get(`/api/cadastro/info/${slug}`).then((r) => setInfo(r.data)).catch(() => setErro('Condomínio não encontrado')) }, [slug])
@@ -56,7 +56,14 @@ export default function CadastroPublico() {
               </div>
             )}
             <div><Label>Apartamento</Label><Input value={f.apartamento} onChange={(e) => setF({ ...f, apartamento: e.target.value })} /></div>
-            <div><Label>Senha (6 dígitos)</Label><Input inputMode="numeric" pattern="\d{6}" maxLength={6} value={f.senha} onChange={(e) => setF({ ...f, senha: e.target.value })} required /></div>
+            <div><Label>Senha (6 dígitos)</Label><Input inputMode="numeric" pattern="\d{6}" maxLength={6} value={f.senha} onChange={(e) => setF({ ...f, senha: e.target.value.replace(/\D/g, '').slice(0, 6) })} required /></div>
+            <div>
+              <Label>PIN para documentos (4 dígitos)</Label>
+              <Input inputMode="numeric" pattern="\d{4}" maxLength={4}
+                value={f.pin} onChange={(e) => setF({ ...f, pin: e.target.value.replace(/\D/g, '').slice(0, 4) })}
+                placeholder="0000" required />
+              <div className="text-xs text-slate-500 mt-1">Usado para acessar documentos do condomínio. Pode ser diferente da sua senha.</div>
+            </div>
             {erro && <div className="text-sm text-red-600">{erro}</div>}
             <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Enviando…' : 'Cadastrar'}</Button>
           </form>

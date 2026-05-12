@@ -20,4 +20,5 @@ public class Morador
     public bool EmailInvalido { get; set; }
     public string? TokenReset { get; set; }
     public DateTime? TokenResetExpiraEm { get; set; }
+    public string? PinHash { get; set; }
 }

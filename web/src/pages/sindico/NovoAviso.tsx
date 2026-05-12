@@ -9,7 +9,7 @@ type Morador = { id: string; nome: string; telefone?: string; apartamento?: stri
 type Categoria = { id: string; nome: string }
 type Area = { id: string; nome: string }
 
-const TIPOS = [{ v: 1, l: 'Aviso' }, { v: 2, l: 'Comunicado' }, { v: 3, l: 'Informativo' }, { v: 4, l: 'Notificação' }] as const
+const TIPOS = [{ v: 1, l: 'Aviso' }, { v: 2, l: 'Comunicado' }, { v: 3, l: 'Informativo' }, { v: 4, l: 'Notificação' }, { v: 5, l: 'Documento' }] as const
 
 export default function NovoAviso() {
   const nav = useNavigate()
@@ -54,7 +54,8 @@ export default function NovoAviso() {
 
   async function uploadAnexo(file: File) {
     const fd = new FormData(); fd.append('file', file)
-    const { data } = await api.post('/api/uploads/anexo', fd)
+    const endpoint = f.tipo === 5 ? '/api/uploads/documento' : '/api/uploads/anexo'
+    const { data } = await api.post(endpoint, fd)
     setAnexo(data)
   }
 

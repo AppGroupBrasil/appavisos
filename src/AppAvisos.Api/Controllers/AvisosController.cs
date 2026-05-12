@@ -12,13 +12,38 @@ namespace AppAvisos.Api.Controllers;
 [ApiController]
 [Route("api/avisos")]
 [Authorize]
-public class AvisosController(AppDbContext db, CurrentUser user) : ControllerBase
+public class AvisosController(AppDbContext db, CurrentUser user, IWebHostEnvironment env) : ControllerBase
 {
     public record CriarAvisoReq(
         string Titulo, string Texto, EscopoAviso Escopo, Guid? BlocoId, Guid? MoradorId, Guid? AreaId,
         TemplateAviso Template, TipoMensagem Tipo, Guid? CategoriaId, bool Urgente, bool Fixado,
         DateTime? PublicarEm, DateTime? ValidoAte,
         string? AnexoUrl, string? AnexoNome, long? AnexoTamanho);
+
+    [HttpGet("{id:guid}/anexo")]
+    public async Task<IActionResult> BaixarAnexo(Guid id)
+    {
+        var a = await db.Avisos.AsNoTracking()
+            .Where(x => x.Id == id && x.CondominioId == user.CondominioId)
+            .Select(x => new { x.AnexoUrl, x.AnexoNome, x.CondominioId }).FirstOrDefaultAsync();
+        if (a is null || string.IsNullOrEmpty(a.AnexoUrl)) return NotFound();
+        if (!a.AnexoUrl.StartsWith("documento:")) return Redirect(a.AnexoUrl);
+        var arquivo = a.AnexoUrl.Substring("documento:".Length);
+        var caminho = Path.Combine(env.ContentRootPath, "documentos", a.CondominioId.ToString(), arquivo);
+        if (!System.IO.File.Exists(caminho)) return NotFound();
+        var ext = Path.GetExtension(arquivo).ToLowerInvariant();
+        var mime = ext switch
+        {
+            ".pdf" => "application/pdf",
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".webp" => "image/webp",
+            ".doc" => "application/msword",
+            ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            _ => "application/octet-stream"
+        };
+        return PhysicalFile(caminho, mime, a.AnexoNome ?? arquivo);
+    }
 
     [HttpPost]
     [Authorize(Roles = "Sindico,Subsindico")]

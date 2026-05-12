@@ -13,6 +13,7 @@ export function ShellSindico({ children }: { children: ReactNode }) {
     ['/painel/timeline', 'Timeline'],
     ['/painel/reportes', 'Reportes'],
     ['/painel/canais-reporte', 'Canais de reporte'],
+    ['/painel/documentos', 'Documentos'],
     ['/painel/areas', 'Áreas'],
     ['/painel/identidade', 'Identidade'],
     ['/painel/qr', 'QR Codes'],

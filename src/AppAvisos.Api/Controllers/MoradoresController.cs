@@ -107,7 +107,7 @@ public class MoradoresController(AppDbContext db, CurrentUser user) : Controller
 [Route("api/cadastro")]
 public class CadastroPublicoMoradorController(AppDbContext db) : ControllerBase
 {
-    public record AutoCadastroReq(string Slug, string Nome, string Email, string? Telefone, Guid? BlocoId, string? Apartamento, string Senha);
+    public record AutoCadastroReq(string Slug, string Nome, string Email, string? Telefone, Guid? BlocoId, string? Apartamento, string Senha, string? Pin);
 
     [HttpPost("morador")]
     public async Task<IActionResult> AutoCadastro(AutoCadastroReq req)
@@ -120,6 +120,8 @@ public class CadastroPublicoMoradorController(AppDbContext db) : ControllerBase
             return BadRequest(new { erro = "E-mail inválido" });
         if (!Regex.IsMatch(req.Senha ?? "", @"^\d{6}$"))
             return BadRequest(new { erro = "Senha deve ter 6 dígitos" });
+        if (!string.IsNullOrEmpty(req.Pin) && !Regex.IsMatch(req.Pin, @"^\d{4}$"))
+            return BadRequest(new { erro = "PIN deve ter 4 dígitos" });
         if (await db.Moradores.AnyAsync(m => m.CondominioId == cond.Id && m.Email == email))
             return Conflict(new { erro = "Já existe cadastro com este e-mail" });
 
@@ -132,6 +134,7 @@ public class CadastroPublicoMoradorController(AppDbContext db) : ControllerBase
             BlocoId = req.BlocoId,
             Apartamento = req.Apartamento?.Trim(),
             SenhaHash = BCrypt.Net.BCrypt.HashPassword(req.Senha),
+            PinHash = string.IsNullOrEmpty(req.Pin) ? null : BCrypt.Net.BCrypt.HashPassword(req.Pin),
             Status = StatusMorador.Pendente
         });
         await db.SaveChangesAsync();

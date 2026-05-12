@@ -46,6 +46,7 @@ services:
       Vapid__PrivateKey: ${VAPID_PRIVATE}
     volumes:
       - appavisos_uploads:/app/uploads
+      - appavisos_documentos:/app/documentos
       - appavisos_logs:/app/logs
     networks:
       - appavisos_internal
@@ -106,6 +107,7 @@ services:
 volumes:
   appavisos_postgres:
   appavisos_uploads:
+  appavisos_documentos:
   appavisos_logs:
 
 networks:
