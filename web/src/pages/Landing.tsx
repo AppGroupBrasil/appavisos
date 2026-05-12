@@ -164,7 +164,7 @@ export default function Landing() {
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <header className="border-b border-slate-200 bg-white">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="font-bold text-lg">AppAvisos</div>
+          <div className="font-bold text-lg">App Avisos</div>
           <nav className="flex items-center gap-2 sm:gap-4 text-sm">
             <a href="#protocolo" className="hidden sm:inline text-slate-600 hover:text-slate-900">Protocolo</a>
             <a href="#funcionalidades" className="hidden sm:inline text-slate-600 hover:text-slate-900">Funcionalidades</a>
@@ -306,7 +306,7 @@ export default function Landing() {
 
       <footer className="px-4 py-8 bg-white border-t border-slate-200">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between gap-4 text-sm text-slate-600">
-          <div>© AppAvisos. Todos os direitos reservados.</div>
+          <div>© App Avisos. Todos os direitos reservados.</div>
           <div className="flex gap-4">
             <Link to="/privacidade" className="hover:text-slate-900">Privacidade</Link>
             <Link to="/termos" className="hover:text-slate-900">Termos</Link>
@@ -316,7 +316,7 @@ export default function Landing() {
       </footer>
 
       <a
-        href={wppLink('Olá! Tenho interesse no AppAvisos.')}
+        href={wppLink('Olá! Tenho interesse no App Avisos.')}
         target="_blank"
         rel="noreferrer"
         aria-label="Falar no WhatsApp"

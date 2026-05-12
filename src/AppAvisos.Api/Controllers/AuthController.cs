@@ -35,12 +35,12 @@ public class AuthController(AppDbContext db, JwtService jwt, AppAvisos.Api.Servi
 
         var link = $"{appUrl}/redefinir/{token}";
         var html = $@"<div style='font-family:Inter,Arial,sans-serif;max-width:560px;margin:24px auto;padding:24px;color:#0F172A'>
-<h2>Recuperação de senha — AppAvisos</h2>
+<h2>Recuperação de senha — App Avisos</h2>
 <p>Olá, {System.Net.WebUtility.HtmlEncode(nome)}.</p>
 <p>Use o botão abaixo para definir uma nova senha (link válido por 2 horas):</p>
 <p><a href='{link}' style='display:inline-block;padding:12px 24px;background:#0F172A;color:#fff;text-decoration:none;border-radius:8px;font-weight:600'>Redefinir senha</a></p>
 <p style='color:#64748B;font-size:13px'>Se você não solicitou, ignore este e-mail.</p></div>";
-        try { await email.EnviarAsync(emailNorm, "Recuperação de senha — AppAvisos", html); } catch { }
+        try { await email.EnviarAsync(emailNorm, "Recuperação de senha — App Avisos", html); } catch { }
         return Ok();
     }
 

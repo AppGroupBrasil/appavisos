@@ -4,17 +4,17 @@ export default function Termos() {
   return (
     <div className="min-h-full max-w-3xl mx-auto p-6 md:p-10 text-slate-800 dark:text-slate-200">
       <Link to="/login" className="text-sm text-slate-500 hover:text-slate-700">← Voltar</Link>
-      <h1 className="text-3xl font-bold mt-4 mb-2">Termos de Uso — AppAvisos</h1>
+      <h1 className="text-3xl font-bold mt-4 mb-2">Termos de Uso — App Avisos</h1>
       <p className="text-sm text-slate-500 mb-8">Última atualização: 10 de maio de 2026</p>
 
       <div className="space-y-6 text-[15px] leading-relaxed">
         <section>
           <h2 className="text-xl font-semibold mb-2">1. Aceitação</h2>
-          <p>Ao usar o AppAvisos, você concorda com estes termos. Se não concordar, não utilize o serviço.</p>
+          <p>Ao usar o App Avisos, você concorda com estes termos. Se não concordar, não utilize o serviço.</p>
         </section>
         <section>
           <h2 className="text-xl font-semibold mb-2">2. O serviço</h2>
-          <p>O AppAvisos é uma plataforma de comunicação entre administração de condomínios (síndicos, subsíndicos) e moradores, oferecida em modelo SaaS.</p>
+          <p>O App Avisos é uma plataforma de comunicação entre administração de condomínios (síndicos, subsíndicos) e moradores, oferecida em modelo SaaS.</p>
         </section>
         <section>
           <h2 className="text-xl font-semibold mb-2">3. Cadastro</h2>
@@ -25,7 +25,7 @@ export default function Termos() {
           <ul className="list-disc pl-6 space-y-1">
             <li>O síndico é responsável pelo conteúdo publicado e pela veracidade das informações sobre os moradores.</li>
             <li>O morador é responsável por manter seus dados de cadastro atualizados.</li>
-            <li>O AppAvisos não modera o conteúdo dos avisos, mas pode remover conteúdo ilegal ou abusivo mediante denúncia.</li>
+            <li>O App Avisos não modera o conteúdo dos avisos, mas pode remover conteúdo ilegal ou abusivo mediante denúncia.</li>
           </ul>
         </section>
         <section>

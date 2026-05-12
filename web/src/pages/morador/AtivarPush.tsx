@@ -54,7 +54,7 @@ export default function AtivarPush() {
         <div className="mt-6 text-xs text-slate-500 text-left space-y-1">
           <div className="font-medium text-slate-700 dark:text-slate-300">No iPhone:</div>
           <div>1. Toque em Compartilhar (□↑) → "Adicionar à Tela de Início"</div>
-          <div>2. Abra o ícone do AppAvisos na tela de início</div>
+          <div>2. Abra o ícone do App Avisos na tela de início</div>
           <div>3. Toque em Ativar acima</div>
         </div>
       </Card>

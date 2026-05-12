@@ -4,13 +4,13 @@ export default function Privacidade() {
   return (
     <div className="min-h-full max-w-3xl mx-auto p-6 md:p-10 text-slate-800 dark:text-slate-200">
       <Link to="/login" className="text-sm text-slate-500 hover:text-slate-700">← Voltar</Link>
-      <h1 className="text-3xl font-bold mt-4 mb-2">Política de Privacidade — AppAvisos</h1>
+      <h1 className="text-3xl font-bold mt-4 mb-2">Política de Privacidade — App Avisos</h1>
       <p className="text-sm text-slate-500 mb-8">Última atualização: 10 de maio de 2026</p>
 
       <div className="space-y-6 text-[15px] leading-relaxed">
         <section>
           <h2 className="text-xl font-semibold mb-2">1. Quem somos</h2>
-          <p>O AppAvisos é uma plataforma de comunicação entre síndicos e moradores de condomínios. Esta política descreve como tratamos os dados pessoais dos usuários do sistema (síndicos, subsíndicos e moradores), em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD).</p>
+          <p>O App Avisos é uma plataforma de comunicação entre síndicos e moradores de condomínios. Esta política descreve como tratamos os dados pessoais dos usuários do sistema (síndicos, subsíndicos e moradores), em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD).</p>
         </section>
 
         <section>

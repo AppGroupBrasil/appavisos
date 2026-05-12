@@ -12,8 +12,8 @@ export default defineConfig({
       filename: 'sw.ts',
       injectRegister: 'auto',
       manifest: {
-        name: 'AppAvisos',
-        short_name: 'AppAvisos',
+        name: 'App Avisos',
+        short_name: 'App Avisos',
         description: 'Avisos do seu condomínio',
         theme_color: '#0F172A',
         background_color: '#F8FAFC',
