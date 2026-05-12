@@ -25,16 +25,10 @@ const features = [
 
 const planos = [
   {
-    nome: 'Essencial',
-    preco: 99,
-    sub: 'até 100 unidades',
-    bullets: ['Avisos ilimitados', 'E-mail + Push', 'Recibos e ciência', 'Cadastro por QR', 'Suporte por WhatsApp'],
-  },
-  {
     nome: 'Profissional',
     preco: 199,
     sub: 'a partir de 101 unidades',
-    bullets: ['Tudo do Essencial', 'Multi-bloco / multi-área', 'Timeline do condomínio', 'Importação em massa', 'Identidade personalizada'],
+    bullets: ['Avisos ilimitados', 'E-mail + Push', 'Recibos e ciência', 'Multi-bloco / multi-área', 'Timeline do condomínio', 'Importação em massa', 'Identidade personalizada'],
   },
   {
     nome: 'Administradora',
@@ -61,7 +55,7 @@ type Consulta = {
 
 const STATUS_CLR: Record<string, { txt: string; cls: string }> = {
   Aberto: { txt: 'Aberto', cls: 'bg-amber-100 text-amber-800' },
-  EmExecucao: { txt: 'Em execução', cls: 'bg-blue-100 text-blue-800' },
+  EmExecucao: { txt: 'Em execução', cls: 'bg-blue-600 text-white' },
   Finalizado: { txt: 'Finalizado', cls: 'bg-emerald-100 text-emerald-800' },
   Arquivado: { txt: 'Arquivado', cls: 'bg-slate-200 text-slate-700' },
 }
@@ -94,7 +88,7 @@ function ConsultaProtocolo() {
           <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold">🔎</div>
           <div>
             <div className="text-lg font-bold">Consulte seu protocolo</div>
-            <div className="text-xs text-slate-500">Sem login. Sem cadastro. Apenas o número de 6 dígitos.</div>
+            <div className="text-xs text-slate-700">Sem login. Sem cadastro. Apenas o número de 6 dígitos.</div>
           </div>
         </div>
         <form onSubmit={consultar} className="mt-4 flex flex-col sm:flex-row gap-2">
@@ -118,17 +112,17 @@ function ConsultaProtocolo() {
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusLabel(r.status).cls}`}>
                 {statusLabel(r.status).txt}
               </span>
-              <span className="text-xs text-slate-500">Protocolo {r.protocolo}</span>
+              <span className="text-xs text-slate-700">Protocolo {r.protocolo}</span>
             </div>
             <div className="font-semibold">{r.titulo}</div>
-            <div className="text-xs text-slate-500 mt-1">
+            <div className="text-xs text-slate-700 mt-1">
               {r.condominio}{r.area ? ` · ${r.area}` : ''} · enviado em {new Date(r.criadoEm).toLocaleString('pt-BR')}
             </div>
             {r.resposta ? (
               <div className="mt-3 bg-emerald-50 border-l-4 border-emerald-500 rounded p-3">
                 <div className="text-xs font-semibold text-emerald-800 mb-1">Resposta do síndico</div>
                 <div className="text-sm text-slate-800 whitespace-pre-wrap">{r.resposta}</div>
-                <div className="text-xs text-slate-500 mt-2">
+                <div className="text-xs text-slate-700 mt-2">
                   — {r.respondidoPor}{r.respondidoEm ? `, ${new Date(r.respondidoEm).toLocaleString('pt-BR')}` : ''}
                 </div>
               </div>
@@ -196,7 +190,7 @@ export default function Landing() {
               Sou morador
             </Link>
           </div>
-          <p className="mt-4 text-xs text-slate-500">7 dias grátis. Cancele quando quiser.</p>
+          <p className="mt-4 text-xs text-slate-700">7 dias grátis. Cancele quando quiser.</p>
         </div>
       </section>
 
@@ -249,7 +243,7 @@ export default function Landing() {
             </div>
             <div className="mt-4 text-center">
               <div className="font-semibold">Academia · Bloco A</div>
-              <div className="text-xs text-slate-500 mt-1">Reporte um problema · Solicite manutenção</div>
+              <div className="text-xs text-slate-700 mt-1">Reporte um problema · Solicite manutenção</div>
             </div>
           </div>
         </div>
@@ -266,11 +260,11 @@ export default function Landing() {
                 className="bg-white border border-slate-200 rounded-2xl p-6"
               >
                 <div className="text-lg font-semibold">{p.nome}</div>
-                <div className="text-sm text-slate-500">{p.sub}</div>
+                <div className="text-sm text-slate-700">{p.sub}</div>
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-sm text-slate-500">R$</span>
+                  <span className="text-sm text-slate-700">R$</span>
                   <span className="text-4xl font-bold">{p.preco}</span>
-                  <span className="text-sm text-slate-500">/mês</span>
+                  <span className="text-sm text-slate-700">/mês</span>
                 </div>
                 <ul className="mt-6 space-y-2 text-sm">
                   {p.bullets.map((b) => (
@@ -297,7 +291,7 @@ export default function Landing() {
       <section className="px-4 py-16 bg-slate-900 text-white">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold">Pronto para acabar com o grupo no WhatsApp?</h2>
-          <p className="mt-3 text-slate-300">Cadastre seu condomínio em 2 minutos. Sem cartão de crédito.</p>
+          <p className="mt-3 text-slate-500">Cadastre seu condomínio em 2 minutos. Sem cartão de crédito.</p>
           <Link to="/cadastrar-condominio" className="mt-8 inline-block bg-white text-slate-900 px-6 py-3 rounded-lg font-semibold hover:bg-slate-100">
             Cadastrar meu condomínio
           </Link>

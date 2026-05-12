@@ -40,7 +40,7 @@ export default function Moradores() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Moradores</h1>
         <div className="flex gap-2">
-          <a href="/api/importacao/moradores/modelo.xlsx" className="text-sm text-slate-500 hover:text-slate-700 self-center">Baixar modelo</a>
+          <a href="/api/importacao/moradores/modelo.xlsx" className="text-sm text-slate-700 hover:text-slate-700 self-center">Baixar modelo</a>
           <label className="cursor-pointer">
             <input type="file" accept=".xlsx" className="hidden" onChange={(e) => e.target.files?.[0] && importarExcel(e.target.files[0])} />
             <span className="inline-block px-4 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-sm font-medium">Importar Excel</span>
@@ -79,7 +79,7 @@ export default function Moradores() {
           <div key={m.id} className={`p-4 flex items-center justify-between rounded-xl border ${m.status === 1 ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'}`}>
             <div>
               <div className="font-medium">{m.nome} {m.status === 1 && <span className="text-xs px-2 py-0.5 rounded bg-amber-200 text-amber-800 ml-2 font-semibold">Aguardando aprovação</span>}</div>
-              <div className="text-xs text-slate-500">{m.email} {m.telefone && `• ${m.telefone}`} {m.apartamento && `• Apto ${m.apartamento}`}</div>
+              <div className="text-xs text-slate-700">{m.email} {m.telefone && `• ${m.telefone}`} {m.apartamento && `• Apto ${m.apartamento}`}</div>
             </div>
             <div className="flex gap-2">
               {m.status === 1 && <Button onClick={() => aprovar(m.id)}>Aprovar</Button>}

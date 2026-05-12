@@ -26,7 +26,7 @@ export default function CadastroPublico() {
       <Card className="p-8 max-w-sm text-center">
         <div className="text-5xl mb-3">✓</div>
         <h1 className="text-xl font-bold mb-2">Cadastro enviado</h1>
-        <p className="text-sm text-slate-500">Aguarde a aprovação do síndico. Você receberá um e-mail quando for liberado.</p>
+        <p className="text-sm text-slate-700">Aguarde a aprovação do síndico. Você receberá um e-mail quando for liberado.</p>
       </Card>
     </div>
   )
@@ -38,7 +38,7 @@ export default function CadastroPublico() {
           <div className="text-center mb-6">
             {info.condominio.logoUrl && <img src={info.condominio.logoUrl} className="h-16 mx-auto mb-2" />}
             <div className="text-xl font-bold">{info.condominio.nome}</div>
-            <div className="text-sm text-slate-500">Cadastro de morador</div>
+            <div className="text-sm text-slate-700">Cadastro de morador</div>
           </div>
         )}
         <Card className="p-6">
@@ -62,7 +62,7 @@ export default function CadastroPublico() {
               <Input inputMode="numeric" pattern="\d{4}" maxLength={4}
                 value={f.pin} onChange={(e) => setF({ ...f, pin: e.target.value.replace(/\D/g, '').slice(0, 4) })}
                 placeholder="0000" required />
-              <div className="text-xs text-slate-500 mt-1">Usado para acessar documentos do condomínio. Pode ser diferente da sua senha.</div>
+              <div className="text-xs text-slate-700 mt-1">Usado para acessar documentos do condomínio. Pode ser diferente da sua senha.</div>
             </div>
             {erro && <div className="text-sm text-red-600">{erro}</div>}
             <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Enviando…' : 'Cadastrar'}</Button>

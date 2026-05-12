@@ -31,7 +31,7 @@ const LABEL: Record<string, string> = {
 
 const STATUS_CLS: Record<string, string> = {
   Aberto: 'bg-amber-100 text-amber-800',
-  EmExecucao: 'bg-blue-100 text-blue-800',
+  EmExecucao: 'bg-blue-600 text-white',
   Finalizado: 'bg-emerald-100 text-emerald-800',
   Arquivado: 'bg-slate-200 text-slate-700',
   Rascunho: 'bg-slate-200 text-slate-700',
@@ -71,8 +71,10 @@ export default function Timeline() {
     setF({ tipo: '', subtipo: '', q: '', protocolo: '', de: '', ate: '' })
   }
 
-  function abrirRelatorio() {
-    window.open(`/api/timeline/relatorio?${montarQuery()}`, '_blank')
+  async function abrirRelatorio() {
+    const r = await api.get(`/api/timeline/relatorio?${montarQuery()}`, { responseType: 'blob' })
+    const url = URL.createObjectURL(r.data)
+    window.open(url, '_blank')
   }
 
   const subtipoOpts = f.tipo === 'reporte' ? SUBTIPOS_REPORTE
@@ -85,7 +87,7 @@ export default function Timeline() {
         <h1 className="text-2xl font-bold">Timeline</h1>
         <Button onClick={abrirRelatorio} disabled={itens.length === 0}>📄 Gerar relatório (PDF)</Button>
       </div>
-      <p className="text-sm text-slate-500 mb-6">Avisos e reportes unificados, com filtros e busca inteligente.</p>
+      <p className="text-sm text-slate-700 mb-6">Avisos e reportes unificados, com filtros e busca inteligente.</p>
 
       <Card className="p-4 mb-4 space-y-3">
         <div>
@@ -133,19 +135,19 @@ export default function Timeline() {
         </div>
       </Card>
 
-      <div className="text-xs text-slate-500 mb-2">
+      <div className="text-xs text-slate-700 mb-2">
         {carregando ? 'Carregando...' : `${itens.length} ${itens.length === 1 ? 'registro' : 'registros'}`}
       </div>
 
       <div className="space-y-2">
         {itens.length === 0 && !carregando && (
-          <Card className="p-8 text-center text-slate-500 text-sm">Nenhum registro encontrado com esses filtros.</Card>
+          <Card className="p-8 text-center text-slate-700 text-sm">Nenhum registro encontrado com esses filtros.</Card>
         )}
         {itens.map(i => {
           const conteudo = (
             <>
               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${i.tipo === 'aviso' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'}`}>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${i.tipo === 'aviso' ? 'bg-blue-600 text-white' : 'bg-amber-100 text-amber-800'}`}>
                   {LABEL[i.subtipo] ?? i.subtipo}
                 </span>
                 {i.status && (
@@ -153,13 +155,13 @@ export default function Timeline() {
                     {LABEL[i.status] ?? i.status}
                   </span>
                 )}
-                {i.protocolo && <span className="text-xs text-slate-400 font-mono">#{i.protocolo}</span>}
-                <span className="text-xs text-slate-400 ml-auto">{new Date(i.criadoEm).toLocaleString('pt-BR')}</span>
+                {i.protocolo && <span className="text-xs text-slate-600 font-mono">#{i.protocolo}</span>}
+                <span className="text-xs text-slate-600 ml-auto">{new Date(i.criadoEm).toLocaleString('pt-BR')}</span>
               </div>
               <div className="font-medium">{i.titulo}</div>
-              <div className="text-xs text-slate-500 mt-0.5">{i.resumo}</div>
+              <div className="text-xs text-slate-700 mt-0.5">{i.resumo}</div>
               {(i.moradorNome || i.apartamento) && (
-                <div className="text-xs text-slate-400 mt-1">
+                <div className="text-xs text-slate-600 mt-1">
                   {i.moradorNome ?? '—'}{i.bloco && ` · ${i.bloco}`}{i.apartamento && ` · Apto ${i.apartamento}`}
                 </div>
               )}

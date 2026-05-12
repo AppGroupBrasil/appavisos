@@ -5,7 +5,7 @@ export function Button({ className = '', variant = 'primary', ...p }: ButtonHTML
   const styles = {
     primary: 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100',
     secondary: 'bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700',
-    ghost: 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800',
+    ghost: 'text-slate-600 hover:bg-slate-100 dark:text-slate-600 dark:hover:bg-slate-800',
     danger: 'bg-red-600 text-white hover:bg-red-700',
     whatsapp: 'bg-[#25D366] text-white hover:bg-[#20BD5C]',
   }
@@ -25,5 +25,5 @@ export function Card({ children, className = '' }: { children: ReactNode; classN
 }
 
 export function Label({ children }: { children: ReactNode }) {
-  return <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{children}</label>
+  return <label className="block text-sm font-medium text-slate-700 dark:text-slate-500 mb-1.5">{children}</label>
 }

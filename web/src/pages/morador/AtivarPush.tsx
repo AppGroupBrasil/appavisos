@@ -44,15 +44,15 @@ export default function AtivarPush() {
       <Card className="p-8 max-w-sm text-center">
         <div className="text-5xl mb-3">📱</div>
         <h1 className="text-xl font-bold mb-2">Ativar notificações</h1>
-        <p className="text-sm text-slate-500 mb-6">Receba os avisos do condomínio direto no seu celular, mesmo com o app fechado.</p>
+        <p className="text-sm text-slate-700 mb-6">Receba os avisos do condomínio direto no seu celular, mesmo com o app fechado.</p>
 
         {estado === 'ok' && <div className="text-emerald-600 font-medium">✓ Notificações ativadas</div>}
         {estado === 'negado' && <div className="text-red-600 text-sm">Você bloqueou. Habilite nas configurações do navegador.</div>}
         {estado === 'erro' && <div className="text-red-600 text-sm">{msg}</div>}
         {estado !== 'ok' && <Button onClick={ativar} disabled={estado === 'pedindo'} className="w-full">{estado === 'pedindo' ? 'Aguarde…' : 'Ativar'}</Button>}
 
-        <div className="mt-6 text-xs text-slate-500 text-left space-y-1">
-          <div className="font-medium text-slate-700 dark:text-slate-300">No iPhone:</div>
+        <div className="mt-6 text-xs text-slate-700 text-left space-y-1">
+          <div className="font-medium text-slate-700 dark:text-slate-500">No iPhone:</div>
           <div>1. Toque em Compartilhar (□↑) → "Adicionar à Tela de Início"</div>
           <div>2. Abra o ícone do App Avisos na tela de início</div>
           <div>3. Toque em Ativar acima</div>

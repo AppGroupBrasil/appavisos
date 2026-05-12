@@ -34,7 +34,7 @@ export default function Documentos() {
         <h1 className="text-2xl font-bold">Documentos</h1>
         <Link to="/painel/avisos/novo?tipo=5"><Button>+ Novo documento</Button></Link>
       </div>
-      <p className="text-sm text-slate-500 mb-4">
+      <p className="text-sm text-slate-700 mb-4">
         Documentos do condomínio (convenção, atas, regulamentos, contratos). Moradores acessam em
         <code className="px-1 mx-1 bg-slate-100 rounded">/c/&#123;slug&#125;/documentos</code> e baixam após informar PIN.
       </p>
@@ -42,7 +42,7 @@ export default function Documentos() {
       <Input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar por título..." className="mb-4" />
 
       {lista.length === 0 ? (
-        <Card className="p-8 text-center text-slate-500 text-sm">
+        <Card className="p-8 text-center text-slate-700 text-sm">
           Nenhum documento. Clique em "+ Novo documento" para fazer o upload.
         </Card>
       ) : (
@@ -52,10 +52,10 @@ export default function Documentos() {
               <Card className="p-4 hover:bg-slate-50">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    {d.categoriaNome && <div className="text-xs text-slate-500 mb-1">{d.categoriaNome}</div>}
+                    {d.categoriaNome && <div className="text-xs text-slate-700 mb-1">{d.categoriaNome}</div>}
                     <div className="font-semibold">{d.titulo}</div>
-                    {d.anexoNome && <div className="text-xs text-slate-400 mt-1">📎 {d.anexoNome}</div>}
-                    <div className="text-xs text-slate-400 mt-1">
+                    {d.anexoNome && <div className="text-xs text-slate-600 mt-1">📎 {d.anexoNome}</div>}
+                    <div className="text-xs text-slate-600 mt-1">
                       {new Date(d.publicadoEm ?? d.criadoEm).toLocaleString('pt-BR')}
                     </div>
                   </div>

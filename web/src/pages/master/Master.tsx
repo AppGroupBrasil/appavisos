@@ -30,23 +30,23 @@ export default function Master() {
   }
 
   return (
-    <div className="min-h-full max-w-6xl mx-auto p-6">
-      <header className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Master — Condomínios</h1>
-        <button onClick={() => { logout(); nav('/login') }} className="text-sm text-slate-500">Sair</button>
+    <div className="min-h-full max-w-6xl mx-auto p-4 sm:p-6">
+      <header className="flex items-center justify-between mb-6 gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Master — Condomínios</h1>
+        <button onClick={() => { logout(); nav('/login') }} className="text-sm text-slate-700 hover:text-slate-900">Sair</button>
       </header>
       <div className="space-y-3">
         {lista.map((c) => (
-          <Card key={c.id} className="p-4 flex items-center justify-between gap-4">
+          <Card key={c.id} className="p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <div className="font-semibold truncate">{c.nome}</div>
-                {c.bloqueado && <span className="text-xs px-2 py-0.5 rounded bg-red-100 text-red-700">Bloqueado</span>}
-                {c.inadimplente && <span className="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-700">Inadimplente</span>}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="font-semibold text-slate-900 break-words">{c.nome}</div>
+                {c.bloqueado && <span className="text-xs px-2 py-0.5 rounded bg-red-100 text-red-800">Bloqueado</span>}
+                {c.inadimplente && <span className="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-900">Inadimplente</span>}
               </div>
-              <div className="text-xs text-slate-500 mt-1">/{c.slug} • {c.totalMoradores} moradores • {c.totalAvisos} avisos</div>
+              <div className="text-xs text-slate-700 mt-1 break-all">/{c.slug} • {c.totalMoradores} moradores • {c.totalAvisos} avisos</div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 md:flex-nowrap md:shrink-0">
               <Button variant="secondary" onClick={() => inadimplencia(c)}>{c.inadimplente ? 'Marcar adimplente' : 'Marcar inadimplente'}</Button>
               <Button variant={c.bloqueado ? 'secondary' : 'danger'} onClick={() => bloquear(c)}>{c.bloqueado ? 'Desbloquear' : 'Bloquear'}</Button>
               <Button variant="ghost" onClick={() => excluir(c)}>Excluir</Button>

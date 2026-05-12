@@ -35,9 +35,9 @@ export default function CadastroCondominio() {
   return (
     <div className="min-h-full flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm">
-        <Link to="/login" className="text-sm text-slate-500 hover:text-slate-700 mb-4 inline-block">← Voltar</Link>
+        <Link to="/login" className="text-sm text-slate-700 hover:text-slate-700 mb-4 inline-block">← Voltar</Link>
         <h1 className="text-2xl font-bold mb-1">Cadastrar condomínio</h1>
-        <p className="text-sm text-slate-500 mb-6">Você será cadastrado como síndico</p>
+        <p className="text-sm text-slate-700 mb-6">Você será cadastrado como síndico</p>
 
         <Card className="p-6">
           <form onSubmit={enviar} className="space-y-4">

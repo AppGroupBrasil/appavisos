@@ -11,10 +11,9 @@ export function ShellSindico({ children }: { children: ReactNode }) {
     ['/painel/blocos', 'Blocos'],
     ['/painel/moradores', 'Moradores'],
     ['/painel/timeline', 'Timeline'],
-    ['/painel/reportes', 'Reportes'],
-    ['/painel/canais-reporte', 'Canais de reporte'],
+    ['/painel/solicitacoes', 'Solicitações dos moradores'],
     ['/painel/documentos', 'Documentos'],
-    ['/painel/areas', 'Áreas'],
+    ['/painel/areas', 'QR Codes das áreas'],
     ['/painel/identidade', 'Identidade'],
     ['/painel/qr', 'QR Codes'],
   ]
@@ -22,7 +21,7 @@ export function ShellSindico({ children }: { children: ReactNode }) {
     <div className="min-h-full grid md:grid-cols-[240px_1fr]">
       <aside className="bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 flex flex-col">
         <div className="font-bold text-lg mb-1">App Avisos</div>
-        <div className="text-xs text-slate-500 mb-6">{user?.nome}</div>
+        <div className="text-xs text-slate-700 mb-6">{user?.nome}</div>
         <nav className="flex-1 space-y-1">
           {links.map(([to, label]) => (
             <Link key={to} to={to}
@@ -31,7 +30,7 @@ export function ShellSindico({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
-        <button onClick={() => { logout(); nav('/login') }} className="text-sm text-slate-500 hover:text-slate-700 text-left px-3 py-2">Sair</button>
+        <button onClick={() => { logout(); nav('/login') }} className="text-sm text-slate-700 hover:text-slate-700 text-left px-3 py-2">Sair</button>
       </aside>
       <main className="p-6 max-w-5xl w-full">{children}</main>
     </div>

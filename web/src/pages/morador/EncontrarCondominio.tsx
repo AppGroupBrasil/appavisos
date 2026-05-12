@@ -42,9 +42,9 @@ export default function EncontrarCondominio() {
   return (
     <div className="min-h-full flex items-center justify-center p-6">
       <div className="w-full max-w-sm">
-        <Link to="/login" className="text-sm text-slate-500 hover:text-slate-700 mb-4 inline-block">← Voltar</Link>
+        <Link to="/login" className="text-sm text-slate-700 hover:text-slate-700 mb-4 inline-block">← Voltar</Link>
         <h1 className="text-2xl font-bold mb-1">Cadastrar-se como morador</h1>
-        <p className="text-sm text-slate-500 mb-6">Informe o CNPJ do seu condomínio (você encontra no boleto) ou o código fornecido pelo síndico.</p>
+        <p className="text-sm text-slate-700 mb-6">Informe o CNPJ do seu condomínio (você encontra no boleto) ou o código fornecido pelo síndico.</p>
 
         <Card className="p-6">
           <div className="flex gap-2 mb-5 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">

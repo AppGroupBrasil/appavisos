@@ -26,8 +26,7 @@ import EncontrarCondominio from './pages/morador/EncontrarCondominio'
 import AtivarPush from './pages/morador/AtivarPush'
 import Master from './pages/master/Master'
 import Reportar from './pages/Reportar'
-import Reportes from './pages/sindico/Reportes'
-import CanaisReporte from './pages/sindico/CanaisReporte'
+import SolicitacoesMoradores from './pages/sindico/SolicitacoesMoradores'
 import DocumentosSindico from './pages/sindico/Documentos'
 import DocumentosPublico from './pages/morador/Documentos'
 
@@ -53,8 +52,9 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/cadastro/:slug" element={<CadastroPublico />} />
         <Route path="/c/:slug/reportar" element={<Reportar />} />
         <Route path="/c/:slug/reportar/:canal" element={<Reportar />} />
-        <Route path="/painel/reportes" element={<Protegida perfil={Sindico}><Reportes /></Protegida>} />
-        <Route path="/painel/canais-reporte" element={<Protegida perfil={Sindico}><CanaisReporte /></Protegida>} />
+        <Route path="/painel/solicitacoes" element={<Protegida perfil={Sindico}><SolicitacoesMoradores /></Protegida>} />
+        <Route path="/painel/reportes" element={<Navigate to="/painel/solicitacoes" replace />} />
+        <Route path="/painel/canais-reporte" element={<Navigate to="/painel/solicitacoes?aba=canais" replace />} />
         <Route path="/painel/documentos" element={<Protegida perfil={Sindico}><DocumentosSindico /></Protegida>} />
         <Route path="/c/:slug/documentos" element={<DocumentosPublico />} />
         <Route path="/sou-morador" element={<EncontrarCondominio />} />

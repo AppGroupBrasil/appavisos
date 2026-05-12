@@ -116,8 +116,8 @@ export default function NovoAviso() {
             </div>
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Categoria</label>
-                <button type="button" onClick={() => setGerenciarCat(true)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" title="Gerenciar categorias">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-500">Categoria</label>
+                <button type="button" onClick={() => setGerenciarCat(true)} className="text-slate-600 hover:text-slate-600 dark:hover:text-slate-200" title="Gerenciar categorias">
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                 </button>
               </div>
@@ -155,7 +155,7 @@ export default function NovoAviso() {
                 <option value="">Selecione…</option>
                 {areas.map((a) => <option key={a.id} value={a.id}>{a.nome}</option>)}
               </select>
-              <p className="text-xs text-slate-500 mt-1">Aviso visível ao escanear o QR Code da área. Não envia e-mail/push.</p>
+              <p className="text-xs text-slate-700 mt-1">Aviso visível ao escanear o QR Code da área. Não envia e-mail/push.</p>
             </div>
           )}
 
@@ -262,7 +262,7 @@ function ModalCategorias({ categorias, onClose, onChange }: { categorias: Catego
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-lg">Gerenciar categorias</h2>
-          <button onClick={onClose} className="text-slate-500">✕</button>
+          <button onClick={onClose} className="text-slate-700">✕</button>
         </div>
         <form onSubmit={adicionar} className="flex gap-2 mb-4">
           <Input value={nova} onChange={(e) => setNova(e.target.value)} placeholder="Nova categoria" />
@@ -280,7 +280,7 @@ function ModalCategorias({ categorias, onClose, onChange }: { categorias: Catego
               ) : (
                 <>
                   <span className="flex-1">{c.nome}</span>
-                  <button onClick={() => setEditando({ id: c.id, nome: c.nome })} className="text-slate-500 hover:text-slate-700 text-sm">editar</button>
+                  <button onClick={() => setEditando({ id: c.id, nome: c.nome })} className="text-slate-700 hover:text-slate-700 text-sm">editar</button>
                   <button onClick={() => excluir(c.id)} className="text-red-500 hover:text-red-700 text-sm">excluir</button>
                 </>
               )}

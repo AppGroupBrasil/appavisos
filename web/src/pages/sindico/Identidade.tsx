@@ -36,7 +36,7 @@ export default function Identidade() {
   return (
     <ShellSindico>
       <h1 className="text-2xl font-bold mb-2">Identidade do condomínio</h1>
-      <p className="text-sm text-slate-500 mb-6">Aparece no cabeçalho do app e nos e-mails</p>
+      <p className="text-sm text-slate-700 mb-6">Aparece no cabeçalho do app e nos e-mails</p>
 
       <form onSubmit={salvar} className="max-w-2xl space-y-4">
         <Card className="p-5 space-y-4">
@@ -73,7 +73,7 @@ export default function Identidade() {
                 className="mt-1" />
               <div className="text-sm">
                 <div className="font-medium">Exigir identificação do morador</div>
-                <div className="text-slate-500">Quando marcado, nome e apartamento são obrigatórios para enviar o formulário. Desmarque para permitir envio anônimo.</div>
+                <div className="text-slate-700">Quando marcado, nome e apartamento são obrigatórios para enviar o formulário. Desmarque para permitir envio anônimo.</div>
               </div>
             </label>
           </div>

@@ -20,7 +20,7 @@ export default function Areas() {
   return (
     <ShellSindico>
       <h1 className="text-2xl font-bold mb-2">Áreas</h1>
-      <p className="text-sm text-slate-500 mb-6">Espaços comuns do condomínio (salão de festas, academia, piscina, etc.). Cada área tem seu próprio QR Code para avisos específicos.</p>
+      <p className="text-sm text-slate-700 mb-6">Espaços comuns do condomínio (salão de festas, academia, piscina, etc.). Cada área tem seu próprio QR Code para avisos específicos.</p>
 
       <Card className="p-5 mb-6">
         <form onSubmit={criar} className="flex gap-2">
@@ -42,7 +42,7 @@ export default function Areas() {
               <>
                 <div className="flex-1">
                   <div className="font-medium">{a.nome}</div>
-                  <div className="text-xs text-slate-500">/{a.slug}</div>
+                  <div className="text-xs text-slate-700">/{a.slug}</div>
                 </div>
                 <Button variant="ghost" onClick={() => setEditando({ id: a.id, nome: a.nome })}>Editar</Button>
                 <Button variant="ghost" onClick={() => excluir(a.id)}>Excluir</Button>

@@ -90,7 +90,7 @@ export default function Documentos() {
         || (d.categoria ?? '').toLowerCase().includes(busca.toLowerCase()))
     : docs
 
-  if (erro) return <div className="p-6 text-center text-slate-500">{erro}</div>
+  if (erro) return <div className="p-6 text-center text-slate-700">{erro}</div>
 
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4">
@@ -98,13 +98,13 @@ export default function Documentos() {
         <div className="text-center mb-6">
           {logoUrl && <img src={logoUrl} alt="" className="h-12 mx-auto mb-2" />}
           <h1 className="text-2xl font-bold">{condominio}</h1>
-          <p className="text-sm text-slate-500">Documentos do condomínio</p>
+          <p className="text-sm text-slate-700">Documentos do condomínio</p>
         </div>
 
         <Input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar por título ou categoria..." className="mb-4" />
 
         {lista.length === 0 ? (
-          <Card className="p-8 text-center text-slate-500 text-sm">
+          <Card className="p-8 text-center text-slate-700 text-sm">
             {docs.length === 0 ? 'Nenhum documento publicado.' : 'Nenhum resultado para essa busca.'}
           </Card>
         ) : (
@@ -113,10 +113,10 @@ export default function Documentos() {
               <Card key={d.id} className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    {d.categoria && <div className="text-xs text-slate-500 mb-1">{d.categoria}</div>}
+                    {d.categoria && <div className="text-xs text-slate-700 mb-1">{d.categoria}</div>}
                     <div className="font-semibold">{d.titulo}</div>
                     {d.texto && <div className="text-sm text-slate-600 mt-1 line-clamp-2">{d.texto}</div>}
-                    <div className="text-xs text-slate-400 mt-1">
+                    <div className="text-xs text-slate-600 mt-1">
                       {new Date(d.publicadoEm).toLocaleDateString('pt-BR')}
                       {d.anexoNome && ` · ${d.anexoNome}`}
                       {d.anexoTamanho ? ` · ${formatTamanho(d.anexoTamanho)}` : ''}
@@ -136,7 +136,7 @@ export default function Documentos() {
             {!modoRecuperar ? (
               <>
                 <h2 className="text-lg font-bold mb-1">Acesso aos documentos</h2>
-                <p className="text-sm text-slate-500 mb-4">Confirme sua identidade para baixar.</p>
+                <p className="text-sm text-slate-700 mb-4">Confirme sua identidade para baixar.</p>
                 <div className="space-y-3">
                   <div>
                     <Label>E-mail ou telefone cadastrado</Label>
@@ -166,7 +166,7 @@ export default function Documentos() {
             ) : (
               <>
                 <h2 className="text-lg font-bold mb-1">Recuperar PIN</h2>
-                <p className="text-sm text-slate-500 mb-4">Enviaremos um novo PIN para seu e-mail.</p>
+                <p className="text-sm text-slate-700 mb-4">Enviaremos um novo PIN para seu e-mail.</p>
                 <div className="space-y-3">
                   <div>
                     <Label>E-mail cadastrado</Label>

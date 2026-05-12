@@ -101,9 +101,9 @@ export default function Reportar() {
           <h1 className="text-xl font-bold mb-2">Enviado com sucesso!</h1>
           <p className="text-slate-600 text-sm mb-4">O síndico foi notificado.</p>
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4">
-            <div className="text-xs text-slate-500 uppercase tracking-wider">Seu protocolo</div>
+            <div className="text-xs text-slate-700 uppercase tracking-wider">Seu protocolo</div>
             <div className="text-4xl font-bold tracking-widest mt-1">{sucesso.protocolo}</div>
-            <div className="text-xs text-slate-500 mt-2">Guarde este número. Consulte o status a qualquer momento na página inicial.</div>
+            <div className="text-xs text-slate-700 mt-2">Guarde este número. Consulte o status a qualquer momento na página inicial.</div>
           </div>
           <a href={sucesso.link} target="_blank" rel="noreferrer" className="block text-sm text-slate-900 underline break-all">Ver registro completo</a>
         </Card>
@@ -111,7 +111,7 @@ export default function Reportar() {
     )
   }
 
-  if (!cfg) return <div className="p-6 text-center text-slate-500">{erro || 'Carregando...'}</div>
+  if (!cfg) return <div className="p-6 text-center text-slate-700">{erro || 'Carregando...'}</div>
 
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4">
@@ -119,9 +119,9 @@ export default function Reportar() {
         <div className="text-center mb-6">
           {cfg.logoUrl && <img src={cfg.logoUrl} alt="" className="h-12 mx-auto mb-2" />}
           <h1 className="text-xl font-bold">{cfg.nome}</h1>
-          <p className="text-sm text-slate-500">{cfg.canalNome ?? 'Reportar para o síndico'}</p>
-          {cfg.canalDescricao && <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">{cfg.canalDescricao}</p>}
-          {cfg.canalAreaNome && <p className="text-xs text-slate-400 mt-1">Área: {cfg.canalAreaNome}</p>}
+          <p className="text-sm text-slate-700">{cfg.canalNome ?? 'Reportar para o síndico'}</p>
+          {cfg.canalDescricao && <p className="text-xs text-slate-700 mt-1 max-w-md mx-auto">{cfg.canalDescricao}</p>}
+          {cfg.canalAreaNome && <p className="text-xs text-slate-600 mt-1">Área: {cfg.canalAreaNome}</p>}
         </div>
 
         <Card className="p-5 space-y-4">

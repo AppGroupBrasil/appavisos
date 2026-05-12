@@ -51,7 +51,7 @@ export default function Login() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="text-2xl font-bold tracking-tight">App Avisos</div>
-          <div className="text-sm text-slate-500 mt-1">Avisos do seu condomínio</div>
+          <div className="text-sm text-slate-700 mt-1">Avisos do seu condomínio</div>
         </div>
 
         <Card className="p-6">
@@ -73,19 +73,19 @@ export default function Login() {
                 <Input type={show ? 'text' : 'password'} inputMode="numeric" pattern="\d{6}" maxLength={6}
                   value={senha} onChange={(e) => setSenha(e.target.value)} required />
                 <button type="button" onClick={() => setShow(!show)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-600 text-sm">
                   {show ? '🙈' : '👁'}
                 </button>
               </div>
             </div>
-            <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 select-none cursor-pointer">
+            <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-600 select-none cursor-pointer">
               <input type="checkbox" checked={lembrar} onChange={(e) => setLembrar(e.target.checked)} className="rounded" />
               Lembrar e-mail e senha neste dispositivo
             </label>
             {erro && <div className="text-sm text-red-600">{erro}</div>}
             <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Entrando…' : 'Entrar'}</Button>
             <div className="text-center text-sm">
-              <Link to="/recuperar" className="text-slate-500 hover:text-slate-700">Esqueci minha senha</Link>
+              <Link to="/recuperar" className="text-slate-700 hover:text-slate-700">Esqueci minha senha</Link>
             </div>
           </form>
         </Card>
@@ -112,7 +112,7 @@ export default function Login() {
           </Button>
         </a>
 
-        <div className="text-center mt-4 text-xs text-slate-500">
+        <div className="text-center mt-4 text-xs text-slate-700">
           <Link to="/privacidade" className="hover:text-slate-700">Privacidade</Link> · <Link to="/termos" className="hover:text-slate-700">Termos</Link>
         </div>
       </div>

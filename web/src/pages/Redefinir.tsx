@@ -30,7 +30,7 @@ export default function Redefinir() {
       <Card className="p-8 max-w-sm text-center">
         <div className="text-5xl mb-3">✓</div>
         <h1 className="text-xl font-bold mb-2">Senha redefinida</h1>
-        <p className="text-sm text-slate-500">Redirecionando para login…</p>
+        <p className="text-sm text-slate-700">Redirecionando para login…</p>
       </Card>
     </div>
   )
@@ -39,14 +39,14 @@ export default function Redefinir() {
     <div className="min-h-full flex items-center justify-center p-6">
       <div className="w-full max-w-sm">
         <h1 className="text-2xl font-bold mb-1">Nova senha</h1>
-        <p className="text-sm text-slate-500 mb-6">Defina uma senha de 6 dígitos.</p>
+        <p className="text-sm text-slate-700 mb-6">Defina uma senha de 6 dígitos.</p>
         <Card className="p-6">
           <form onSubmit={enviar} className="space-y-4">
             <div><Label>Nova senha (6 dígitos)</Label><Input inputMode="numeric" pattern="\d{6}" maxLength={6} value={senha} onChange={(e) => setSenha(e.target.value)} required autoFocus /></div>
             <div><Label>Confirmar senha</Label><Input inputMode="numeric" pattern="\d{6}" maxLength={6} value={confirma} onChange={(e) => setConfirma(e.target.value)} required /></div>
             {erro && <div className="text-sm text-red-600">{erro}</div>}
             <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Salvando…' : 'Redefinir'}</Button>
-            <Link to="/login" className="block text-center text-sm text-slate-500">Voltar</Link>
+            <Link to="/login" className="block text-center text-sm text-slate-700">Voltar</Link>
           </form>
         </Card>
       </div>
