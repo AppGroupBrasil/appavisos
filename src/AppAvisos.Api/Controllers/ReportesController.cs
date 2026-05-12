@@ -56,8 +56,14 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
 
         var fotos = (req.Fotos ?? new()).Take(MaxFotosPorReporte).ToList();
 
+        string protocolo;
+        var rng = new Random();
+        do { protocolo = rng.Next(100000, 1000000).ToString(); }
+        while (await db.Reportes.AnyAsync(x => x.Protocolo == protocolo));
+
         var r = new Reporte
         {
+            Protocolo = protocolo,
             CondominioId = cond.Id,
             AreaId = req.AreaId,
             Categoria = categoria,
@@ -72,7 +78,7 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
         };
         db.Reportes.Add(r);
         await db.SaveChangesAsync();
-        return Ok(new { id = r.Id, token = r.TokenPublico, linkPublico = $"{AppUrl}/r/{r.TokenPublico}" });
+        return Ok(new { id = r.Id, protocolo = r.Protocolo, token = r.TokenPublico, linkPublico = $"{AppUrl}/r/{r.TokenPublico}" });
     }
 
     [HttpPost("publico/reportes/{slug}/foto")]
@@ -107,7 +113,7 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
         var lista = await q.OrderByDescending(r => r.CriadoEm).Take(200)
             .Select(r => new
             {
-                r.Id, r.Categoria, r.Titulo, r.Status, r.Nome, r.Bloco, r.Apartamento,
+                r.Id, r.Protocolo, r.Categoria, r.Titulo, r.Status, r.Nome, r.Bloco, r.Apartamento,
                 r.CriadoEm, r.RespondidoEm, area = r.Area != null ? r.Area.Nome : null,
                 temFotos = r.FotosJson.Length > 2
             }).ToListAsync();
@@ -124,7 +130,7 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
         var fotos = JsonSerializer.Deserialize<List<string>>(r.FotosJson) ?? new();
         return Ok(new
         {
-            r.Id, r.Categoria, r.Titulo, r.Descricao, r.Status,
+            r.Id, r.Protocolo, r.Categoria, r.Titulo, r.Descricao, r.Status,
             r.Nome, r.Bloco, r.Apartamento, r.Telefone, r.Email,
             area = r.Area?.Nome, r.CriadoEm, r.Resposta, r.RespondidoEm, r.RespondidoPor,
             fotos, linkPublico = $"{AppUrl}/r/{r.TokenPublico}",
@@ -152,7 +158,8 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
             var assunto = $"Resposta — {r.Titulo}";
             var html = $@"<div style='font-family:Inter,Arial,sans-serif;max-width:560px;margin:24px auto;padding:24px;color:#0F172A'>
 <h2>{System.Net.WebUtility.HtmlEncode(r.Condominio.Nome)}</h2>
-<p>Olá{(string.IsNullOrEmpty(r.Nome) ? "" : ", " + System.Net.WebUtility.HtmlEncode(r.Nome))}, recebemos sua mensagem sobre <b>{System.Net.WebUtility.HtmlEncode(r.Titulo)}</b>.</p>
+<p>Olá{(string.IsNullOrEmpty(r.Nome) ? "" : ", " + System.Net.WebUtility.HtmlEncode(r.Nome))}, sua mensagem sobre <b>{System.Net.WebUtility.HtmlEncode(r.Titulo)}</b> foi respondida.</p>
+<p style='color:#64748B;font-size:13px'>Protocolo: <b>{r.Protocolo}</b></p>
 <div style='background:#F1F5F9;padding:16px;border-radius:8px;margin:16px 0'>{System.Net.WebUtility.HtmlEncode(r.Resposta).Replace("\n", "<br/>")}</div>
 <p style='color:#64748B;font-size:13px'>— {System.Net.WebUtility.HtmlEncode(r.RespondidoPor ?? "")}</p>
 <p style='color:#64748B;font-size:12px'><a href='{AppUrl}/r/{r.TokenPublico}'>Ver registro completo</a></p></div>";
@@ -180,6 +187,24 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
         return Content(RenderHtml(r), "text/html; charset=utf-8");
     }
 
+    [HttpGet("publico/protocolo/{numero}")]
+    [EnableRateLimiting("auth")]
+    public async Task<IActionResult> ConsultarProtocolo(string numero)
+    {
+        if (!System.Text.RegularExpressions.Regex.IsMatch(numero ?? "", @"^\d{6}$"))
+            return BadRequest(new { erro = "Protocolo deve ter 6 dígitos" });
+        var r = await db.Reportes.AsNoTracking().Include(x => x.Area).Include(x => x.Condominio)
+            .FirstOrDefaultAsync(x => x.Protocolo == numero);
+        if (r is null) return NotFound(new { erro = "Protocolo não encontrado" });
+        return Ok(new
+        {
+            r.Protocolo, r.Titulo, r.Status, categoria = r.Categoria.ToString(),
+            area = r.Area?.Nome, condominio = r.Condominio.Nome,
+            r.CriadoEm, r.Resposta, r.RespondidoEm, r.RespondidoPor,
+            linkCompleto = $"{AppUrl}/r/{r.TokenPublico}"
+        });
+    }
+
     string RenderHtml(Reporte r)
     {
         var fotos = JsonSerializer.Deserialize<List<string>>(r.FotosJson) ?? new();
@@ -192,7 +217,7 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
             CategoriaReporte.Sugestao => "Sugestão",
             _ => "Outro"
         };
-        sb.Append($@"<!DOCTYPE html><html lang='pt-BR'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>{System.Net.WebUtility.HtmlEncode(r.Titulo)} — {System.Net.WebUtility.HtmlEncode(r.Condominio.Nome)}</title>
+        sb.Append($@"<!DOCTYPE html><html lang='pt-BR'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Protocolo {r.Protocolo} — {System.Net.WebUtility.HtmlEncode(r.Condominio.Nome)}</title>
 <style>
 @media print {{ .noprint {{ display:none }} body {{ margin:0 }} }}
 body {{ font-family: Inter,Arial,sans-serif; max-width: 760px; margin: 24px auto; padding: 0 20px; color: #0F172A; }}
@@ -211,6 +236,8 @@ h1 {{ font-size: 22px; margin: 0 0 4px }}
   <button class='btn' onclick='window.print()'>Imprimir / PDF</button>
   <button class='btn sec' onclick='navigator.clipboard.writeText(location.href);this.textContent=""Link copiado""'>Copiar link</button>
 </div>
+<div style='font-size:12px;color:#64748B;letter-spacing:0.1em;text-transform:uppercase'>Protocolo</div>
+<div style='font-size:28px;font-weight:700;letter-spacing:0.15em;margin-bottom:8px'>{r.Protocolo}</div>
 <h1>{System.Net.WebUtility.HtmlEncode(r.Titulo)}</h1>
 <div><span class='cat'>{cat}</span>{(r.Area != null ? $" · {System.Net.WebUtility.HtmlEncode(r.Area.Nome)}" : "")}</div>
 <div class='meta'>{System.Net.WebUtility.HtmlEncode(r.Condominio.Nome)} — {r.CriadoEm:dd/MM/yyyy HH:mm}</div>

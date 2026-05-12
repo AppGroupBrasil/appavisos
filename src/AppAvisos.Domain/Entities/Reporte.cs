@@ -27,5 +27,6 @@ public class Reporte
     public string? RespondidoPor { get; set; }
 
     public string TokenPublico { get; set; } = Guid.NewGuid().ToString("N").Substring(0, 12);
+    public string Protocolo { get; set; } = "";
     public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
 }

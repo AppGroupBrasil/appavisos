@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { api } from '../lib/api'
 
 const WHATS = '5511933284364'
 const wppLink = (msg: string) => `https://wa.me/${WHATS}?text=${encodeURIComponent(msg)}`
@@ -37,6 +39,102 @@ const planos = [
   },
 ]
 
+type Consulta = {
+  protocolo: string
+  titulo: string
+  status: string
+  categoria: string
+  area?: string | null
+  condominio: string
+  criadoEm: string
+  resposta?: string | null
+  respondidoEm?: string | null
+  respondidoPor?: string | null
+  linkCompleto: string
+}
+
+function ConsultaProtocolo() {
+  const [numero, setNumero] = useState('')
+  const [r, setR] = useState<Consulta | null>(null)
+  const [erro, setErro] = useState('')
+  const [carregando, setCarregando] = useState(false)
+
+  async function consultar(e: React.FormEvent) {
+    e.preventDefault()
+    setErro(''); setR(null)
+    if (!/^\d{6}$/.test(numero)) { setErro('Digite os 6 dígitos do protocolo'); return }
+    setCarregando(true)
+    try {
+      const res = await api.get(`/api/publico/protocolo/${numero}`)
+      setR(res.data)
+    } catch (e: any) {
+      setErro(e?.response?.data?.erro ?? 'Protocolo não encontrado')
+    } finally { setCarregando(false) }
+  }
+
+  const statusLabel = (s: string) =>
+    s === 'Aberto' ? { txt: 'Em análise', cls: 'bg-amber-100 text-amber-800' }
+    : s === 'Respondido' ? { txt: 'Respondido', cls: 'bg-emerald-100 text-emerald-800' }
+    : { txt: 'Arquivado', cls: 'bg-slate-200 text-slate-700' }
+
+  return (
+    <section id="protocolo" className="px-4 -mt-8 mb-12">
+      <div className="max-w-3xl mx-auto bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold">🔎</div>
+          <div>
+            <div className="text-lg font-bold">Consulte seu protocolo</div>
+            <div className="text-xs text-slate-500">Sem login. Sem cadastro. Apenas o número de 6 dígitos.</div>
+          </div>
+        </div>
+        <form onSubmit={consultar} className="mt-4 flex flex-col sm:flex-row gap-2">
+          <input
+            inputMode="numeric"
+            pattern="\d{6}"
+            maxLength={6}
+            value={numero}
+            onChange={e => setNumero(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            placeholder="000000"
+            className="flex-1 px-4 py-3 border border-slate-300 rounded-lg text-2xl tracking-[0.4em] text-center font-bold focus:outline-none focus:ring-2 focus:ring-slate-400"
+          />
+          <button type="submit" disabled={carregando} className="bg-slate-900 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-800 disabled:opacity-50">
+            {carregando ? 'Buscando...' : 'Consultar'}
+          </button>
+        </form>
+        {erro && <div className="mt-3 text-sm text-red-600">{erro}</div>}
+        {r && (
+          <div className="mt-5 bg-slate-50 border border-slate-200 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusLabel(r.status).cls}`}>
+                {statusLabel(r.status).txt}
+              </span>
+              <span className="text-xs text-slate-500">Protocolo {r.protocolo}</span>
+            </div>
+            <div className="font-semibold">{r.titulo}</div>
+            <div className="text-xs text-slate-500 mt-1">
+              {r.condominio}{r.area ? ` · ${r.area}` : ''} · enviado em {new Date(r.criadoEm).toLocaleString('pt-BR')}
+            </div>
+            {r.resposta ? (
+              <div className="mt-3 bg-emerald-50 border-l-4 border-emerald-500 rounded p-3">
+                <div className="text-xs font-semibold text-emerald-800 mb-1">Resposta do síndico</div>
+                <div className="text-sm text-slate-800 whitespace-pre-wrap">{r.resposta}</div>
+                <div className="text-xs text-slate-500 mt-2">
+                  — {r.respondidoPor}{r.respondidoEm ? `, ${new Date(r.respondidoEm).toLocaleString('pt-BR')}` : ''}
+                </div>
+              </div>
+            ) : (
+              <div className="mt-3 text-sm text-slate-600">Aguardando resposta do síndico.</div>
+            )}
+            <a href={r.linkCompleto} target="_blank" rel="noreferrer" className="inline-block mt-3 text-xs text-slate-700 underline">
+              Ver registro completo (com fotos)
+            </a>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
 export default function Landing() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -44,6 +142,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="font-bold text-lg">AppAvisos</div>
           <nav className="flex items-center gap-2 sm:gap-4 text-sm">
+            <a href="#protocolo" className="hidden sm:inline text-slate-600 hover:text-slate-900">Protocolo</a>
             <a href="#funcionalidades" className="hidden sm:inline text-slate-600 hover:text-slate-900">Funcionalidades</a>
             <a href="#qrcodes" className="hidden sm:inline text-slate-600 hover:text-slate-900">QR Codes</a>
             <a href="#planos" className="hidden sm:inline text-slate-600 hover:text-slate-900">Planos</a>
@@ -76,6 +175,8 @@ export default function Landing() {
           <p className="mt-4 text-xs text-slate-500">7 dias grátis. Cancele quando quiser.</p>
         </div>
       </section>
+
+      <ConsultaProtocolo />
 
       <section id="funcionalidades" className="px-4 py-16 bg-white border-y border-slate-200">
         <div className="max-w-6xl mx-auto">

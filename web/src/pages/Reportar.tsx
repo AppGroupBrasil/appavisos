@@ -36,7 +36,7 @@ export default function Reportar() {
   const [fotos, setFotos] = useState<string[]>([])
   const [erro, setErro] = useState('')
   const [enviando, setEnviando] = useState(false)
-  const [sucesso, setSucesso] = useState<{ link: string } | null>(null)
+  const [sucesso, setSucesso] = useState<{ link: string; protocolo: string } | null>(null)
   const inputFile = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export default function Reportar() {
         nome: nome || null, bloco: bloco || null, apartamento: apto || null,
         telefone: tel || null, email: emailMor || null
       })
-      setSucesso({ link: r.data.linkPublico })
+      setSucesso({ link: r.data.linkPublico, protocolo: r.data.protocolo })
     } catch (e: any) {
       setErro(e?.response?.data?.erro ?? 'Erro ao enviar')
     } finally { setEnviando(false) }
@@ -88,8 +88,13 @@ export default function Reportar() {
         <Card className="max-w-md w-full p-8 text-center">
           <div className="text-5xl mb-4">✓</div>
           <h1 className="text-xl font-bold mb-2">Enviado com sucesso!</h1>
-          <p className="text-slate-600 text-sm">O síndico foi notificado. Você pode acompanhar pelo link:</p>
-          <a href={sucesso.link} target="_blank" rel="noreferrer" className="block mt-3 text-sm text-slate-900 underline break-all">{sucesso.link}</a>
+          <p className="text-slate-600 text-sm mb-4">O síndico foi notificado.</p>
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4">
+            <div className="text-xs text-slate-500 uppercase tracking-wider">Seu protocolo</div>
+            <div className="text-4xl font-bold tracking-widest mt-1">{sucesso.protocolo}</div>
+            <div className="text-xs text-slate-500 mt-2">Guarde este número. Consulte o status a qualquer momento na página inicial.</div>
+          </div>
+          <a href={sucesso.link} target="_blank" rel="noreferrer" className="block text-sm text-slate-900 underline break-all">Ver registro completo</a>
         </Card>
       </div>
     )

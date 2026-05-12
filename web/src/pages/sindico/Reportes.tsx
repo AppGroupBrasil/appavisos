@@ -5,6 +5,7 @@ import { Button, Card, Textarea } from '../../components/ui'
 
 type ItemLista = {
   id: string
+  protocolo: string
   categoria: string
   titulo: string
   status: string
@@ -19,6 +20,7 @@ type ItemLista = {
 
 type Detalhe = {
   id: string
+  protocolo: string
   categoria: string
   titulo: string
   descricao: string
@@ -113,6 +115,7 @@ export default function Reportes() {
                       {r.status === 'Aberto' && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Aberto</span>}
                       {r.status === 'Respondido' && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Respondido</span>}
                       {r.temFotos && <span className="text-xs text-slate-500">📷</span>}
+                      <span className="text-xs text-slate-400 font-mono">#{r.protocolo}</span>
                     </div>
                     <div className="font-medium">{r.titulo}</div>
                     <div className="text-xs text-slate-500 mt-1">
@@ -141,7 +144,7 @@ export default function Reportes() {
               <button onClick={() => setAberto(null)} className="text-2xl text-slate-400">×</button>
             </div>
             <h2 className="text-xl font-bold mb-1">{aberto.titulo}</h2>
-            <div className="text-xs text-slate-500 mb-4">{new Date(aberto.criadoEm).toLocaleString('pt-BR')}</div>
+            <div className="text-xs text-slate-500 mb-4">Protocolo <span className="font-mono font-semibold">{aberto.protocolo}</span> · {new Date(aberto.criadoEm).toLocaleString('pt-BR')}</div>
 
             <div className="bg-slate-50 rounded-lg p-3 mb-4 whitespace-pre-wrap text-sm">{aberto.descricao}</div>
 

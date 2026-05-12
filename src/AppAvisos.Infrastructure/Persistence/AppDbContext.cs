@@ -94,6 +94,8 @@ public class AppDbContext : DbContext
         b.Entity<Reporte>(e =>
         {
             e.HasIndex(x => x.TokenPublico).IsUnique();
+            e.HasIndex(x => x.Protocolo).IsUnique().HasFilter("\"Protocolo\" <> ''");
+            e.Property(x => x.Protocolo).HasMaxLength(10).IsRequired();
             e.HasIndex(x => new { x.CondominioId, x.CriadoEm });
             e.Property(x => x.Titulo).HasMaxLength(160).IsRequired();
             e.Property(x => x.Descricao).IsRequired();
