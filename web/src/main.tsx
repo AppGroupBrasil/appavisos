@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import './index.css'
 import { useAuth } from './lib/auth'
+import Landing from './pages/Landing'
 import Login from './pages/Login'
 import CadastroCondominio from './pages/CadastroCondominio'
 import Avisos from './pages/sindico/Avisos'
@@ -41,7 +42,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/cadastrar-condominio" element={<CadastroCondominio />} />
         <Route path="/cadastro/:slug" element={<CadastroPublico />} />
