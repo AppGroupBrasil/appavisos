@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.appavisos.app",
+        "sha256_cert_fingerprints": ["F0:72:48:6E:20:73:D8:7B:4F:DE:3F:5E:96:30:5C:A6:13:58:3C:A7:EE:6B:07:7C:01:1B:9F:E0:6B:AB:C2:57"]
+      }
+    }]

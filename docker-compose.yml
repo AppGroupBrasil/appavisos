@@ -1,0 +1,106 @@
+services:
+  appavisos-db:
+    image: postgres:16-alpine
+    container_name: appavisos-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: appavisos
+      POSTGRES_USER: appavisos
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - appavisos_postgres:/var/lib/postgresql/data
+    networks:
+      - appavisos_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appavisos"]
+      interval: 10s
+      retries: 5
+
+  appavisos-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: appavisos-api
+    restart: unless-stopped
+    depends_on:
+      appavisos-db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Postgres: "Host=appavisos-db;Port=5432;Database=appavisos;Username=appavisos;Password=${POSTGRES_PASSWORD}"
+      Jwt__Issuer: appavisos
+      Jwt__Audience: appavisos
+      Jwt__Key: ${JWT_KEY}
+      Jwt__ExpiraMinutos: 60
+      Jwt__RefreshDias: 30
+      Master__Email: ${MASTER_EMAIL}
+      Master__Nome: ${MASTER_NOME}
+      Master__Senha: ${MASTER_SENHA}
+      AppUrl: https://app.appavisos.com.br
+      Email__From: ${EMAIL_FROM}
+      Aws__Region: ${AWS_REGION}
+      Aws__AccessKey: ${AWS_ACCESS_KEY}
+      Aws__SecretKey: ${AWS_SECRET_KEY}
+      Vapid__Subject: ${VAPID_SUBJECT}
+      Vapid__PublicKey: ${VAPID_PUBLIC}
+      Vapid__PrivateKey: ${VAPID_PRIVATE}
+    volumes:
+      - appavisos_uploads:/app/uploads
+    networks:
+      - appavisos_internal
+      - coolify
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=coolify
+      - traefik.http.routers.appavisos-api.rule=Host(`api.appavisos.com.br`)
+      - traefik.http.routers.appavisos-api.entrypoints=https
+      - traefik.http.routers.appavisos-api.tls=true
+      - traefik.http.routers.appavisos-api.tls.certresolver=letsencrypt
+      - traefik.http.services.appavisos-api.loadbalancer.server.port=8080
+
+  appavisos-web:
+    build:
+      context: ./web
+    container_name: appavisos-web
+    restart: unless-stopped
+    networks:
+      - coolify
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=coolify
+      - traefik.http.routers.appavisos-web.rule=Host(`app.appavisos.com.br`) || Host(`appavisos.com.br`) || Host(`www.appavisos.com.br`)
+      - traefik.http.routers.appavisos-web.entrypoints=https
+      - traefik.http.routers.appavisos-web.tls=true
+      - traefik.http.routers.appavisos-web.tls.certresolver=letsencrypt
+      - traefik.http.services.appavisos-web.loadbalancer.server.port=80
+
+  appavisos-db-backup:
+    image: postgres:16-alpine
+    container_name: appavisos-db-backup
+    restart: unless-stopped
+    depends_on:
+      - appavisos-db
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - /root/backups-appavisos:/backups
+    networks:
+      - appavisos_internal
+    entrypoint: |
+      sh -c '
+        while true; do
+          DATE=$$(date +%Y%m%d-%H%M%S)
+          pg_dump -h appavisos-db -U appavisos appavisos | gzip > /backups/appavisos-$$DATE.sql.gz
+          find /backups -name "appavisos-*.sql.gz" -mtime +7 -delete
+          sleep 86400
+        done
+      '
+
+volumes:
+  appavisos_postgres:
+  appavisos_uploads:
+
+networks:
+  appavisos_internal:
+  coolify:
+    external: true

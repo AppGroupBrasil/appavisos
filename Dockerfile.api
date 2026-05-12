@@ -1,0 +1,17 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY AppAvisos.sln ./
+COPY src/AppAvisos.Domain/*.csproj src/AppAvisos.Domain/
+COPY src/AppAvisos.Infrastructure/*.csproj src/AppAvisos.Infrastructure/
+COPY src/AppAvisos.Api/*.csproj src/AppAvisos.Api/
+RUN dotnet restore src/AppAvisos.Api/AppAvisos.Api.csproj
+COPY src/ src/
+RUN dotnet publish src/AppAvisos.Api/AppAvisos.Api.csproj -c Release -o /app /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /app .
+RUN mkdir -p /app/uploads
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+ENTRYPOINT ["dotnet", "AppAvisos.Api.dll"]

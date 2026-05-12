@@ -1,0 +1,11 @@
+bin/
+obj/
+node_modules/
+dist/
+.vs/
+.vscode/
+.idea/
+*.user
+.env
+appsettings.Development.json
+src/AppAvisos.Api/uploads/
