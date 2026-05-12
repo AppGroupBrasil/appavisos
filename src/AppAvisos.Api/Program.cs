@@ -61,7 +61,7 @@ builder.Services.AddRateLimiter(o =>
     }
     o.AddPolicy("auth", ctx =>
         RateLimitPartition.GetFixedWindowLimiter(ClientIp(ctx),
-            _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = 2, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
 });
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
