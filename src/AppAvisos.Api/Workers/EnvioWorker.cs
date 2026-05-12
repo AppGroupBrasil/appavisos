@@ -33,15 +33,23 @@ public class EnvioWorker(IServiceProvider sp, IConfiguration cfg, ILogger<EnvioW
         foreach (var a in avisosPendentes) a.PublicadoEm = DateTime.UtcNow;
         if (avisosPendentes.Count > 0) await db.SaveChangesAsync(ct);
 
+        const int maxTentativas = 5;
+        var agora = DateTime.UtcNow;
         var lote = await db.AvisoRecibos.Include(r => r.Aviso).ThenInclude(a => a.Condominio).Include(r => r.Morador)
-            .Where(r => (r.EmailEnviadoEm == null || r.PushEnviadoEm == null)
+            .Where(r => (
+                    (r.EmailEnviadoEm == null && r.EmailTentativas < maxTentativas
+                        && (r.EmailProximaTentativaEm == null || r.EmailProximaTentativaEm <= agora))
+                 || (r.PushEnviadoEm == null && r.PushTentativas < maxTentativas
+                        && (r.PushProximaTentativaEm == null || r.PushProximaTentativaEm <= agora)))
                 && r.Aviso.PublicadoEm != null && r.Aviso.ArquivadoEm == null
                 && !r.Morador.EmailInvalido)
             .Take(50).ToListAsync(ct);
 
         foreach (var r in lote)
         {
-            if (r.EmailEnviadoEm == null && !string.IsNullOrEmpty(r.Morador.Email))
+            if (r.EmailEnviadoEm == null && r.EmailTentativas < maxTentativas
+                && (r.EmailProximaTentativaEm == null || r.EmailProximaTentativaEm <= agora)
+                && !string.IsNullOrEmpty(r.Morador.Email))
             {
                 try
                 {
@@ -54,10 +62,17 @@ public class EnvioWorker(IServiceProvider sp, IConfiguration cfg, ILogger<EnvioW
                         r.Id);
                     await email.EnviarAsync(r.Morador.Email, assunto, html, ct);
                     r.EmailEnviadoEm = DateTime.UtcNow;
+                    r.EmailProximaTentativaEm = null;
                 }
-                catch (Exception ex) { log.LogWarning(ex, "Falha e-mail recibo {Id}", r.Id); }
+                catch (Exception ex)
+                {
+                    r.EmailTentativas++;
+                    r.EmailProximaTentativaEm = DateTime.UtcNow.AddMinutes(Math.Pow(2, r.EmailTentativas));
+                    log.LogWarning(ex, "Falha e-mail recibo {Id} tentativa {N}", r.Id, r.EmailTentativas);
+                }
             }
-            if (r.PushEnviadoEm == null)
+            if (r.PushEnviadoEm == null && r.PushTentativas < maxTentativas
+                && (r.PushProximaTentativaEm == null || r.PushProximaTentativaEm <= agora))
             {
                 try
                 {
@@ -66,8 +81,14 @@ public class EnvioWorker(IServiceProvider sp, IConfiguration cfg, ILogger<EnvioW
                         $"{appUrl}/c/{r.Aviso.Condominio.Slug}/aviso/{r.Aviso.Id}",
                         r.AvisoId, ct);
                     r.PushEnviadoEm = DateTime.UtcNow;
+                    r.PushProximaTentativaEm = null;
                 }
-                catch (Exception ex) { log.LogWarning(ex, "Falha push recibo {Id}", r.Id); }
+                catch (Exception ex)
+                {
+                    r.PushTentativas++;
+                    r.PushProximaTentativaEm = DateTime.UtcNow.AddMinutes(Math.Pow(2, r.PushTentativas));
+                    log.LogWarning(ex, "Falha push recibo {Id} tentativa {N}", r.Id, r.PushTentativas);
+                }
             }
         }
         if (lote.Count > 0) await db.SaveChangesAsync(ct);

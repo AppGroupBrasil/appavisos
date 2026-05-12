@@ -13,7 +13,11 @@ public class AvisoRecibo
     public DateTime? RespondidoEm { get; set; }
 
     public DateTime? EmailEnviadoEm { get; set; }
+    public int EmailTentativas { get; set; }
+    public DateTime? EmailProximaTentativaEm { get; set; }
     public DateTime? PushEnviadoEm { get; set; }
+    public int PushTentativas { get; set; }
+    public DateTime? PushProximaTentativaEm { get; set; }
 
     public DateTime? EmailAbertoEm { get; set; }
     public string? EmailAbertoIp { get; set; }
