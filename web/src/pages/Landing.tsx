@@ -1,6 +1,4 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { api } from '../lib/api'
 
 const WHATS = '5511933284364'
 const wppLink = (msg: string) => `https://wa.me/${WHATS}?text=${encodeURIComponent(msg)}`
@@ -9,7 +7,6 @@ const features = [
   { titulo: 'Avisos por e-mail, push e WhatsApp', desc: 'Envio automático por e-mail e push assim que o aviso é publicado, e envio manual em 1 clique pelo WhatsApp do morador. Todo aviso registra confirmação de leitura, ciência e resposta.' },
   { titulo: 'Avisos direcionados', desc: 'Para um morador específico, um bloco inteiro, todo o condomínio ou uma área de lazer. QR Codes fixos para cadastro, mural e solicitações, e personalizados para qualquer link que o síndico criar.' },
   { titulo: 'Solicitações com protocolo', desc: '5 categorias (ocorrência, manutenção, reclamação, sugestão, outro), upload de até 5 fotos (galeria ou câmera), título e descrição. Cada envio gera um protocolo único de 6 dígitos.' },
-  { titulo: 'Consulta pública por protocolo', desc: 'Morador acompanha o status do seu chamado direto na página inicial, digitando os 6 dígitos. Sem login, sem cadastro, sem senha — o protocolo já é a chave de acesso.' },
   { titulo: 'Status com histórico auditável', desc: 'Aberto → Em execução → Finalizado, com registro automático de data, hora, autor e perfil em cada mudança. Histórico visível para morador e síndico.' },
   { titulo: 'Identificação configurável', desc: 'O síndico decide se nome e apartamento são obrigatórios ou opcionais no formulário de solicitação. Permite chamados anônimos quando necessário.' },
   { titulo: 'Timeline unificada', desc: 'Linha do tempo com avisos e solicitações juntos. Filtros por tipo, subtipo, data, protocolo e morador. Busca inteligente em títulos, textos e descrições.' },
@@ -58,120 +55,6 @@ const planos = [
   },
 ]
 
-type Consulta = {
-  protocolo: string
-  titulo: string
-  status: string
-  categoria: string
-  area?: string | null
-  condominio: string
-  criadoEm: string
-  resposta?: string | null
-  respondidoEm?: string | null
-  respondidoPor?: string | null
-  historico?: { status: string; autorNome: string; autorPerfil: string; observacao?: string; criadoEm: string }[]
-  linkCompleto: string
-}
-
-const STATUS_CLR: Record<string, { txt: string; cls: string }> = {
-  Aberto: { txt: 'Aberto', cls: 'bg-amber-100 text-amber-800' },
-  EmExecucao: { txt: 'Em execução', cls: 'bg-blue-600 text-white' },
-  Finalizado: { txt: 'Finalizado', cls: 'bg-emerald-100 text-emerald-800' },
-  Arquivado: { txt: 'Arquivado', cls: 'bg-slate-200 text-slate-700' },
-}
-
-function ConsultaProtocolo() {
-  const [numero, setNumero] = useState('')
-  const [r, setR] = useState<Consulta | null>(null)
-  const [erro, setErro] = useState('')
-  const [carregando, setCarregando] = useState(false)
-
-  async function consultar(e: React.FormEvent) {
-    e.preventDefault()
-    setErro(''); setR(null)
-    if (!/^\d{6}$/.test(numero)) { setErro('Digite os 6 dígitos do protocolo'); return }
-    setCarregando(true)
-    try {
-      const res = await api.get(`/api/publico/protocolo/${numero}`)
-      setR(res.data)
-    } catch (e: any) {
-      setErro(e?.response?.data?.erro ?? 'Protocolo não encontrado')
-    } finally { setCarregando(false) }
-  }
-
-  const statusLabel = (s: string) => STATUS_CLR[s] ?? { txt: s, cls: 'bg-slate-100 text-slate-700' }
-
-  return (
-    <section id="protocolo" className="px-4 -mt-8 mb-12">
-      <div className="max-w-3xl mx-auto bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold">🔎</div>
-          <div>
-            <div className="text-lg font-bold">Consulte seu protocolo</div>
-            <div className="text-xs text-slate-700">Sem login. Sem cadastro. Apenas o número de 6 dígitos.</div>
-          </div>
-        </div>
-        <form onSubmit={consultar} className="mt-4 flex flex-col sm:flex-row gap-2">
-          <input
-            inputMode="numeric"
-            pattern="\d{6}"
-            maxLength={6}
-            value={numero}
-            onChange={e => setNumero(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            placeholder="000000"
-            className="flex-1 px-4 py-3 border border-slate-300 rounded-lg text-2xl tracking-[0.4em] text-center font-bold focus:outline-none focus:ring-2 focus:ring-slate-400"
-          />
-          <button type="submit" disabled={carregando} className="bg-slate-900 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-800 disabled:opacity-50">
-            {carregando ? 'Buscando...' : 'Consultar'}
-          </button>
-        </form>
-        {erro && <div className="mt-3 text-sm text-red-600">{erro}</div>}
-        {r && (
-          <div className="mt-5 bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusLabel(r.status).cls}`}>
-                {statusLabel(r.status).txt}
-              </span>
-              <span className="text-xs text-slate-700">Protocolo {r.protocolo}</span>
-            </div>
-            <div className="font-semibold">{r.titulo}</div>
-            <div className="text-xs text-slate-700 mt-1">
-              {r.condominio}{r.area ? ` · ${r.area}` : ''} · enviado em {new Date(r.criadoEm).toLocaleString('pt-BR')}
-            </div>
-            {r.resposta ? (
-              <div className="mt-3 bg-emerald-50 border-l-4 border-emerald-500 rounded p-3">
-                <div className="text-xs font-semibold text-emerald-800 mb-1">Resposta do síndico</div>
-                <div className="text-sm text-slate-800 whitespace-pre-wrap">{r.resposta}</div>
-                <div className="text-xs text-slate-700 mt-2">
-                  — {r.respondidoPor}{r.respondidoEm ? `, ${new Date(r.respondidoEm).toLocaleString('pt-BR')}` : ''}
-                </div>
-              </div>
-            ) : (
-              <div className="mt-3 text-sm text-slate-600">Aguardando resposta do síndico.</div>
-            )}
-            {r.historico && r.historico.length > 0 && (
-              <details className="mt-3 text-sm">
-                <summary className="cursor-pointer text-slate-700">Histórico ({r.historico.length})</summary>
-                <ol className="mt-2 border-l-2 border-slate-200 pl-3 space-y-2">
-                  {r.historico.map((h, i) => (
-                    <li key={i} className="text-xs">
-                      <span className={`inline-block px-2 py-0.5 rounded-full font-semibold ${statusLabel(h.status).cls}`}>{statusLabel(h.status).txt}</span>
-                      <span className="ml-2 text-slate-600">{h.autorNome} ({h.autorPerfil}) — {new Date(h.criadoEm).toLocaleString('pt-BR')}</span>
-                      {h.observacao && <div className="text-slate-700 mt-0.5">{h.observacao}</div>}
-                    </li>
-                  ))}
-                </ol>
-              </details>
-            )}
-            <a href={r.linkCompleto} target="_blank" rel="noreferrer" className="inline-block mt-3 text-xs text-slate-700 underline">
-              Ver registro completo (com fotos)
-            </a>
-          </div>
-        )}
-      </div>
-    </section>
-  )
-}
 
 export default function Landing() {
   return (
@@ -180,7 +63,6 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="font-bold text-lg">App Avisos</div>
           <nav className="flex items-center gap-2 sm:gap-4 text-sm">
-            <a href="#protocolo" className="hidden sm:inline text-slate-600 hover:text-slate-900">Protocolo</a>
             <a href="#funcionalidades" className="hidden sm:inline text-slate-600 hover:text-slate-900">Funcionalidades</a>
             <a href="#qrcodes" className="hidden sm:inline text-slate-600 hover:text-slate-900">QR Codes</a>
             <a href="#planos" className="hidden sm:inline text-slate-600 hover:text-slate-900">Planos</a>
@@ -199,8 +81,8 @@ export default function Landing() {
             <span className="text-slate-600">entregues na hora.</span>
           </h1>
           <p className="mt-6 text-lg text-slate-600 max-w-2xl mx-auto">
-            Síndico cria o aviso, morador recebe por e-mail e notificação no celular.
-            Sem grupo de WhatsApp confuso, sem morador "não vi o aviso".
+            Síndico cria o aviso, morador recebe por e-mail, notificação no celular e WhatsApp.
+            Síndico vê quem abriu o e-mail, com horário — e nunca mais ouve "não vi o aviso".
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/cadastrar-condominio" className="bg-slate-900 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-800">
@@ -213,8 +95,6 @@ export default function Landing() {
           <p className="mt-4 text-xs text-slate-700">7 dias grátis. Cancele quando quiser.</p>
         </div>
       </section>
-
-      <ConsultaProtocolo />
 
       <section id="funcionalidades" className="px-4 py-16 bg-white border-y border-slate-200">
         <div className="max-w-6xl mx-auto">
