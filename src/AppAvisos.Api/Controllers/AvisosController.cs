@@ -153,6 +153,32 @@ public class AvisosController(AppDbContext db, CurrentUser user, IWebHostEnviron
         return NoContent();
     }
 
+    [HttpGet("/api/publico/{condSlug}/mural")]
+    [AllowAnonymous]
+    public async Task<IActionResult> FeedPublico(string condSlug)
+    {
+        var cond = await db.Condominios.AsNoTracking()
+            .Where(c => c.Slug == condSlug && !c.Bloqueado)
+            .Select(c => new { c.Id, c.Nome, c.LogoUrl, c.CorPrimaria, c.DescricaoCurta })
+            .FirstOrDefaultAsync();
+        if (cond is null) return NotFound();
+
+        var avisos = await db.Avisos.AsNoTracking()
+            .Where(a => a.CondominioId == cond.Id
+                && a.Escopo == EscopoAviso.Condominio
+                && a.ArquivadoEm == null
+                && a.PublicadoEm != null && a.PublicadoEm <= DateTime.UtcNow
+                && (a.ValidoAte == null || a.ValidoAte >= DateTime.UtcNow))
+            .OrderByDescending(a => a.Fixado).ThenByDescending(a => a.PublicadoEm)
+            .Select(a => new
+            {
+                a.Id, a.Titulo, a.Texto, a.Tipo, a.Template, a.Urgente, a.Fixado, a.PublicadoEm,
+                a.AnexoUrl, a.AnexoNome
+            }).Take(50).ToListAsync();
+
+        return Ok(new { condominio = new { cond.Nome, cond.LogoUrl, cond.CorPrimaria, cond.DescricaoCurta }, avisos });
+    }
+
     [HttpGet("/api/publico/{condSlug}/area/{areaSlug}")]
     [AllowAnonymous]
     public async Task<IActionResult> FeedArea(string condSlug, string areaSlug)
@@ -230,6 +256,40 @@ public class AvisosController(AppDbContext db, CurrentUser user, IWebHostEnviron
         }
         await db.SaveChangesAsync();
         return NoContent();
+    }
+
+    public record EditarDocumentoReq(string Titulo, string? Texto, Guid? CategoriaId);
+
+    [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Sindico,Subsindico")]
+    public async Task<IActionResult> Editar(Guid id, EditarDocumentoReq req)
+    {
+        if (string.IsNullOrWhiteSpace(req.Titulo)) return BadRequest(new { erro = "Título obrigatório" });
+        var a = await db.Avisos.FirstOrDefaultAsync(x => x.Id == id && x.CondominioId == user.CondominioId);
+        if (a is null) return NotFound();
+        a.Titulo = req.Titulo.Trim();
+        a.Texto = req.Texto ?? "";
+        a.CategoriaId = req.CategoriaId;
+        await db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    [HttpGet("morador/documentos")]
+    [Authorize(Roles = "Morador")]
+    public async Task<IActionResult> DocumentosMorador()
+    {
+        var docs = await db.Avisos.AsNoTracking()
+            .Where(a => a.CondominioId == user.CondominioId && a.Tipo == TipoMensagem.Documento
+                && a.ArquivadoEm == null && a.AnexoUrl != null)
+            .Include(a => a.Categoria)
+            .OrderByDescending(a => a.PublicadoEm ?? a.CriadoEm)
+            .Select(a => new
+            {
+                a.Id, a.Titulo, a.Texto, a.AnexoNome, a.AnexoTamanho,
+                categoria = a.Categoria != null ? a.Categoria.Nome : null,
+                publicadoEm = a.PublicadoEm ?? a.CriadoEm
+            }).Take(200).ToListAsync();
+        return Ok(docs);
     }
 
     static string GerarToken()

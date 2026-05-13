@@ -85,9 +85,15 @@ export default function Timeline() {
     <ShellSindico>
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-2xl font-bold">Timeline</h1>
-        <Button onClick={abrirRelatorio} disabled={itens.length === 0}>📄 Gerar relatório (PDF)</Button>
+        <div className="text-right">
+          <Button onClick={abrirRelatorio} disabled={itens.length === 0}>📄 Gerar relatório (PDF)</Button>
+          <p className="text-xs text-slate-500 mt-1">O PDF gerado reflete os filtros aplicados.</p>
+        </div>
       </div>
-      <p className="text-sm text-slate-700 mb-6">Avisos e reportes unificados, com filtros e busca inteligente.</p>
+      <p className="text-sm text-slate-500 mb-6">
+        Visão unificada de todos os avisos publicados pelo síndico e solicitações enviadas pelos moradores, em ordem cronológica.
+        Use os filtros para refinar por tipo, subtipo, número de protocolo ou período. Clique em qualquer registro para ver os detalhes.
+      </p>
 
       <Card className="p-4 mb-4 space-y-3">
         <div>

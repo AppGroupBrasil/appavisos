@@ -38,18 +38,19 @@ public class EnvioWorker(IServiceProvider sp, IConfiguration cfg, ILogger<EnvioW
         var lote = await db.AvisoRecibos.Include(r => r.Aviso).ThenInclude(a => a.Condominio).Include(r => r.Morador)
             .Where(r => (
                     (r.EmailEnviadoEm == null && r.EmailTentativas < maxTentativas
-                        && (r.EmailProximaTentativaEm == null || r.EmailProximaTentativaEm <= agora))
+                        && (r.EmailProximaTentativaEm == null || r.EmailProximaTentativaEm <= agora)
+                        && r.Morador.NotificacoesEmail && !r.Morador.EmailInvalido)
                  || (r.PushEnviadoEm == null && r.PushTentativas < maxTentativas
                         && (r.PushProximaTentativaEm == null || r.PushProximaTentativaEm <= agora)))
-                && r.Aviso.PublicadoEm != null && r.Aviso.ArquivadoEm == null
-                && !r.Morador.EmailInvalido)
+                && r.Aviso.PublicadoEm != null && r.Aviso.ArquivadoEm == null)
             .Take(50).ToListAsync(ct);
 
         foreach (var r in lote)
         {
             if (r.EmailEnviadoEm == null && r.EmailTentativas < maxTentativas
                 && (r.EmailProximaTentativaEm == null || r.EmailProximaTentativaEm <= agora)
-                && !string.IsNullOrEmpty(r.Morador.Email))
+                && !string.IsNullOrEmpty(r.Morador.Email)
+                && r.Morador.NotificacoesEmail && !r.Morador.EmailInvalido)
             {
                 try
                 {

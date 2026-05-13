@@ -33,14 +33,17 @@ docker compose logs -f appavisos-api
 
 Migrations rodam automaticamente no startup; usuário Master é seedado via env.
 
-## 4. Amazon SES
+## 4. Elastic Email (envio de e-mail)
 
-1. Console AWS → SES → Verified identities → criar identidade do domínio `appavisos.com.br`
-2. Adicionar registros DKIM (3 CNAMEs) no Cloudflare
-3. Adicionar SPF: `v=spf1 include:amazonses.com ~all` em registro TXT no apex
-4. DMARC: `v=DMARC1; p=quarantine; rua=mailto:contato@appavisos.com.br` em `_dmarc`
-5. SES está em sandbox por padrão. Abrir ticket "Request production access" descrevendo: avisos para moradores cadastrados, opt-in, sem marketing
-6. Criar IAM user com policy `AmazonSESFullAccess` → Access Key/Secret no `.env`
+1. Conta: eddnportugal@gmail.com em elasticemail.com
+2. No painel: **Settings → SMTP → Create SMTP Credentials** para gerar usuário/senha SMTP
+3. No `.env` preencher:
+   - `EMAIL_FROM=noreply@appavisos.com.br`
+   - `EMAIL_SMTP_USER=eddnportugal@gmail.com`
+   - `EMAIL_SMTP_PASS=<api-key>` (ver CREDENCIAIS.md)
+4. Verificar o domínio `appavisos.com.br` no painel → adicionar registros DKIM e SPF no Cloudflare:
+   - SPF: `v=spf1 include:_spf.elasticemail.com ~all`
+   - DKIM: gerado pelo Elastic Email na tela de verificação de domínio
 
 ## 5. Testar
 

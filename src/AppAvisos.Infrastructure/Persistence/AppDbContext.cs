@@ -20,6 +20,8 @@ public class AppDbContext : DbContext
     public DbSet<Reporte> Reportes => Set<Reporte>();
     public DbSet<HistoricoReporte> HistoricosReporte => Set<HistoricoReporte>();
     public DbSet<CanalReporte> CanaisReporte => Set<CanalReporte>();
+    public DbSet<ConfiguracaoSistema> ConfiguracoesSistema => Set<ConfiguracaoSistema>();
+    public DbSet<QrPersonalizado> QrPersonalizados => Set<QrPersonalizado>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -128,6 +130,22 @@ public class AppDbContext : DbContext
             e.Property(x => x.Token).HasMaxLength(20).IsRequired();
             e.HasOne(x => x.Condominio).WithMany().HasForeignKey(x => x.CondominioId).OnDelete(DeleteBehavior.Cascade);
             e.HasOne(x => x.Area).WithMany().HasForeignKey(x => x.AreaId).OnDelete(DeleteBehavior.SetNull);
+        });
+
+        b.Entity<ConfiguracaoSistema>(e =>
+        {
+            e.HasKey(x => x.Chave);
+            e.Property(x => x.Chave).HasMaxLength(80).IsRequired();
+            e.Property(x => x.Valor).HasMaxLength(200).IsRequired();
+        });
+
+        b.Entity<QrPersonalizado>(e =>
+        {
+            e.HasIndex(x => new { x.CondominioId, x.Ordem });
+            e.Property(x => x.Titulo).HasMaxLength(120).IsRequired();
+            e.Property(x => x.Descricao).HasMaxLength(500);
+            e.Property(x => x.Url).HasMaxLength(1000).IsRequired();
+            e.HasOne(x => x.Condominio).WithMany().HasForeignKey(x => x.CondominioId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

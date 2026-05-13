@@ -11,13 +11,14 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
-Directory.CreateDirectory("/app/logs");
+var logsDir = Path.Combine(AppContext.BaseDirectory, "logs");
+try { Directory.CreateDirectory(logsDir); } catch { logsDir = Path.GetTempPath(); }
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .WriteTo.Console()
-    .WriteTo.File("/app/logs/app-.log",
+    .WriteTo.File(Path.Combine(logsDir, "app-.log"),
         rollingInterval: RollingInterval.Day,
         retainedFileCountLimit: 14,
         fileSizeLimitBytes: 50_000_000,
@@ -71,11 +72,15 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 builder.Services.AddSingleton<JwtService>();
 builder.Services.AddScoped<CurrentUser>();
 builder.Services.AddScoped<AppAvisos.Api.Services.PushService>();
+builder.Services.AddSingleton<AppAvisos.Api.Services.ActiveEmailProvider>();
 
-if (builder.Environment.IsDevelopment() && string.IsNullOrEmpty(builder.Configuration["Aws:AccessKey"]))
-    builder.Services.AddSingleton<AppAvisos.Api.Services.IEmailSender, AppAvisos.Api.Services.ConsoleEmailSender>();
+var temCredenciais = !string.IsNullOrEmpty(builder.Configuration["Email:Resend:SmtpPass"])
+    || !string.IsNullOrEmpty(builder.Configuration["Email:ElasticEmail:SmtpPass"]);
+
+if (temCredenciais)
+    builder.Services.AddSingleton<AppAvisos.Api.Services.IEmailSender, AppAvisos.Api.Services.SmtpEmailSender>();
 else
-    builder.Services.AddSingleton<AppAvisos.Api.Services.IEmailSender, AppAvisos.Api.Services.SesEmailSender>();
+    builder.Services.AddSingleton<AppAvisos.Api.Services.IEmailSender, AppAvisos.Api.Services.ConsoleEmailSender>();
 
 builder.Services.AddHostedService<AppAvisos.Api.Workers.EnvioWorker>();
 
@@ -134,6 +139,10 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppAvisos.Infrastructure.Persistence.AppDbContext>();
     await db.Database.MigrateAsync();
+
+    var cfg = await db.ConfiguracoesSistema.FindAsync("email_provedor");
+    if (cfg is not null)
+        app.Services.GetRequiredService<AppAvisos.Api.Services.ActiveEmailProvider>().Current = cfg.Valor;
 }
 await AppAvisos.Api.MasterSeeder.SeedAsync(app.Services);
 

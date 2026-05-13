@@ -165,4 +165,25 @@ public class CadastroPublicoMoradorController(AppDbContext db) : ControllerBase
         if (c is null) return NotFound(new { erro = "Condomínio não encontrado por este CNPJ" });
         return Ok(c);
     }
+
+    [HttpGet("/api/publico/descadastrar/{moradorId:guid}")]
+    public async Task<IActionResult> InfoDescadastro(Guid moradorId)
+    {
+        var m = await db.Moradores.AsNoTracking().Include(x => x.Condominio)
+            .Where(x => x.Id == moradorId)
+            .Select(x => new { x.Email, condominio = x.Condominio.Nome, x.NotificacoesEmail })
+            .FirstOrDefaultAsync();
+        if (m is null) return NotFound();
+        return Ok(m);
+    }
+
+    [HttpPost("/api/publico/descadastrar/{moradorId:guid}")]
+    public async Task<IActionResult> Descadastrar(Guid moradorId)
+    {
+        var m = await db.Moradores.FirstOrDefaultAsync(x => x.Id == moradorId);
+        if (m is null) return NotFound();
+        m.NotificacoesEmail = false;
+        await db.SaveChangesAsync();
+        return NoContent();
+    }
 }

@@ -35,7 +35,8 @@ export default function Recibos() {
 
   return (
     <ShellSindico>
-      <h1 className="text-2xl font-bold mb-2">Recibos</h1>
+      <h1 className="text-2xl font-bold mb-1">Recibos</h1>
+      <p className="text-sm text-slate-500 mb-3">Acompanhe quem leu, abriu o e-mail ou confirmou ciência do aviso. Para moradores que ainda não viram, use o botão WhatsApp para notificá-los diretamente.</p>
       {data && <div className="text-sm text-slate-700 mb-4">{data.lidos} de {data.total} leram ({Math.round(data.lidos / Math.max(1, data.total) * 100)}%)</div>}
 
       <div className="flex gap-2 mb-4 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg w-fit">

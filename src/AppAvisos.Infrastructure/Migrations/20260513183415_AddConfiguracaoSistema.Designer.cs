@@ -3,6 +3,7 @@ using System;
 using AppAvisos.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AppAvisos.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260513183415_AddConfiguracaoSistema")]
+    partial class AddConfiguracaoSistema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -479,9 +482,6 @@ namespace AppAvisos.Infrastructure.Migrations
                         .HasMaxLength(160)
                         .HasColumnType("character varying(160)");
 
-                    b.Property<bool>("NotificacoesEmail")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("PinHash")
                         .HasColumnType("text");
 
@@ -547,43 +547,6 @@ namespace AppAvisos.Infrastructure.Migrations
                     b.HasIndex("MoradorId");
 
                     b.ToTable("PushSubscriptions");
-                });
-
-            modelBuilder.Entity("AppAvisos.Domain.Entities.QrPersonalizado", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CondominioId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CriadoEm")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Descricao")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<int>("Ordem")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Titulo")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CondominioId", "Ordem");
-
-                    b.ToTable("QrPersonalizados");
                 });
 
             modelBuilder.Entity("AppAvisos.Domain.Entities.Reporte", b =>
@@ -892,17 +855,6 @@ namespace AppAvisos.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Morador");
-                });
-
-            modelBuilder.Entity("AppAvisos.Domain.Entities.QrPersonalizado", b =>
-                {
-                    b.HasOne("AppAvisos.Domain.Entities.Condominio", "Condominio")
-                        .WithMany()
-                        .HasForeignKey("CondominioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Condominio");
                 });
 
             modelBuilder.Entity("AppAvisos.Domain.Entities.Reporte", b =>

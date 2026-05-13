@@ -7,20 +7,23 @@ const wppLink = (msg: string) => `https://wa.me/${WHATS}?text=${encodeURICompone
 
 const features = [
   { titulo: 'Avisos por e-mail, push e WhatsApp', desc: 'Envio automático por e-mail e push assim que o aviso é publicado, e envio manual em 1 clique pelo WhatsApp do morador. Todo aviso registra confirmação de leitura, ciência e resposta.' },
-  { titulo: 'Avisos direcionados', desc: 'Para um morador específico, um bloco inteiro, todo o condomínio ou uma área de lazer (academia, salão, piscina). QR Codes permanentes para uso contínuo ou provisórios para obras e eventos.' },
-  { titulo: 'Reportes com protocolo', desc: '5 categorias (ocorrência, manutenção, reclamação, sugestão, outro), upload de até 5 fotos (galeria ou câmera), título e descrição. Cada envio gera um protocolo único de 6 dígitos.' },
+  { titulo: 'Avisos direcionados', desc: 'Para um morador específico, um bloco inteiro, todo o condomínio ou uma área de lazer. QR Codes fixos para cadastro, mural e solicitações, e personalizados para qualquer link que o síndico criar.' },
+  { titulo: 'Solicitações com protocolo', desc: '5 categorias (ocorrência, manutenção, reclamação, sugestão, outro), upload de até 5 fotos (galeria ou câmera), título e descrição. Cada envio gera um protocolo único de 6 dígitos.' },
   { titulo: 'Consulta pública por protocolo', desc: 'Morador acompanha o status do seu chamado direto na página inicial, digitando os 6 dígitos. Sem login, sem cadastro, sem senha — o protocolo já é a chave de acesso.' },
   { titulo: 'Status com histórico auditável', desc: 'Aberto → Em execução → Finalizado, com registro automático de data, hora, autor e perfil em cada mudança. Histórico visível para morador e síndico.' },
-  { titulo: 'Identificação configurável', desc: 'O síndico decide se nome e apartamento são obrigatórios ou opcionais no formulário de reporte. Permite chamados anônimos quando necessário.' },
-  { titulo: 'Timeline unificada', desc: 'Linha do tempo com avisos e reportes juntos. Filtros por tipo, subtipo, data, protocolo e morador. Busca inteligente em títulos, textos e descrições.' },
+  { titulo: 'Identificação configurável', desc: 'O síndico decide se nome e apartamento são obrigatórios ou opcionais no formulário de solicitação. Permite chamados anônimos quando necessário.' },
+  { titulo: 'Timeline unificada', desc: 'Linha do tempo com avisos e solicitações juntos. Filtros por tipo, subtipo, data, protocolo e morador. Busca inteligente em títulos, textos e descrições.' },
   { titulo: 'Relatórios em PDF', desc: 'Gere relatórios profissionais com os filtros aplicados em 1 clique. Layout A4, com cabeçalho, badges coloridos por status e listagem completa pronta para imprimir ou arquivar.' },
-  { titulo: 'Resposta + PDF + link público', desc: 'Síndico responde por e-mail ou WhatsApp em 1 clique. Cada reporte tem uma página pública compartilhável e PDF próprio para arquivamento.' },
+  { titulo: 'Resposta + PDF + link público', desc: 'Síndico responde por e-mail ou WhatsApp em 1 clique. Cada solicitação tem uma página pública compartilhável e PDF próprio para arquivamento.' },
   { titulo: 'Recibos e rastreio em tempo real', desc: 'Para cada aviso enviado: quem abriu o e-mail, quem deu ciência, quem respondeu. Veja a entrega chegando, morador a morador.' },
   { titulo: 'Cadastro por QR Code', desc: 'Imprima o QR e cole no elevador ou portaria. Morador cadastra em 30 segundos pelo celular e o síndico aprova.' },
+  { titulo: 'Documentos com PIN', desc: 'Convenção, atas e regulamentos disponíveis em uma página pública por QR Code. Cada morador escolhe um PIN de 4 dígitos no cadastro — sem PIN, sem acesso ao arquivo.' },
+  { titulo: 'Mural público por QR', desc: 'Cole o QR do mural na portaria ou elevador. Qualquer pessoa vê os avisos do condomínio sem precisar de login — útil para visitantes, prestadores e novos moradores.' },
+  { titulo: 'QR Code personalizado', desc: 'Síndico cria QR Codes próprios apontando para qualquer link: formulário externo, página de reserva, vídeo, regulamento — o que precisar. Tudo formatado para impressão A4 em 4 por página.' },
   { titulo: 'Painel completo do síndico', desc: 'Criação de avisos com anexos, urgência, validade e agendamento. Gestão de blocos, moradores, áreas e categorias. Importação em massa por planilha.' },
   { titulo: 'Identidade do condomínio', desc: 'Logo, cor e nome do seu condomínio em todos os e-mails, no app e nas páginas públicas. Personalização completa.' },
-  { titulo: 'Notificações sem instalar app', desc: 'O morador clica em "Ativar notificações" e o próprio navegador pede a autorização (1 clique). A partir daí recebe push no celular mesmo com o site fechado, como portais de notícia. Sem app, sem loja, sem PWA.' },
-  { titulo: 'LGPD e segurança', desc: 'Senhas criptografadas (bcrypt), autenticação JWT, rate limiting em login, backup diário do banco e isolamento total por condomínio.' },
+  { titulo: 'Notificações sem app de loja', desc: 'O morador clica em "Ativar notificações" e o próprio navegador pede a autorização (1 clique). A partir daí recebe push no celular mesmo com o site fechado, como portais de notícia. Funciona como app — sem precisar baixar de loja.' },
+  { titulo: 'LGPD e segurança', desc: 'Senhas criptografadas (bcrypt), autenticação JWT, rate limiting em login, opt-out de e-mails em 1 clique, backup diário do banco e isolamento total por condomínio.' },
 ]
 
 const planos = [
@@ -28,13 +31,30 @@ const planos = [
     nome: 'Profissional',
     preco: 199,
     sub: 'a partir de 101 unidades',
-    bullets: ['Avisos ilimitados', 'E-mail + Push', 'Recibos e ciência', 'Multi-bloco / multi-área', 'Timeline do condomínio', 'Importação em massa', 'Identidade personalizada'],
+    bullets: [
+      'Avisos ilimitados por e-mail e push',
+      'Solicitações com protocolo público',
+      'Documentos com PIN do morador',
+      'Mural público por QR Code',
+      'QR Codes personalizados',
+      'Recibos, ciência e rastreio',
+      'Multi-bloco / multi-área',
+      'Timeline e relatórios em PDF',
+      'Importação em massa por planilha',
+      'Identidade visual personalizada',
+    ],
   },
   {
     nome: 'Administradora',
     preco: 350,
     sub: 'condomínios ilimitados',
-    bullets: ['Tudo do Profissional', 'Painel Master', 'Quantos condomínios quiser', 'Onboarding assistido', 'Suporte prioritário'],
+    bullets: [
+      'Tudo do plano Profissional',
+      'Painel Master multi-condomínio',
+      'Bloqueio e gestão de inadimplência',
+      'Onboarding assistido',
+      'Suporte prioritário',
+    ],
   },
 ]
 
@@ -218,18 +238,17 @@ export default function Landing() {
             </div>
             <h2 className="mt-4 text-3xl font-bold">QR Codes para tudo no condomínio</h2>
             <p className="mt-4 text-slate-600">
-              Cada QR Code é um canal direto entre morador e síndico. Cole na portaria, no elevador, na academia,
-              no salão de festas — onde fizer sentido. O morador escaneia, registra a ocorrência com foto e descrição,
-              e o síndico recebe na hora.
+              Cada QR Code conecta o morador direto a uma página: cadastro do app, mural de avisos, formulário
+              de solicitações, página de documentos ou qualquer outro link que você criar. Imprima em 4 por página
+              A4 e cole na portaria, no elevador, no salão — onde fizer sentido.
             </p>
             <ul className="mt-6 space-y-3 text-sm">
-              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Permanente</b> — fixo em áreas comuns (portaria, elevador, garagem) para uso contínuo.</span></li>
-              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Provisório</b> — válido por tempo determinado (obra, evento, manutenção pontual).</span></li>
-              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Por área ou setor</b> — academia, piscina, salão de festas, bloco específico.</span></li>
-              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>5 categorias</b> — ocorrência, manutenção, reclamação, sugestão ou outro, em um dropdown simples.</span></li>
-              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Foto + descrição</b> — morador anexa até 5 fotos (galeria ou câmera) com título e descrição.</span></li>
-              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Identificação configurável</b> — síndico decide se nome e apartamento são obrigatórios ou opcionais.</span></li>
-              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Resposta, PDF e link público</b> — síndico responde por e-mail/WhatsApp em 1 clique, gera PDF e compartilha o link da ocorrência.</span></li>
+              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Cadastro de morador</b> — quem escaneia se cadastra no app em 30 segundos, com PIN para documentos.</span></li>
+              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Mural de avisos</b> — quem escaneia vê os comunicados do condomínio sem precisar de login.</span></li>
+              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Solicitações</b> — formulário público com 5 categorias, até 5 fotos e protocolo de 6 dígitos.</span></li>
+              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Personalizado</b> — síndico cria QR Code para qualquer link (obra, evento, regulamento, reserva, vídeo).</span></li>
+              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Identificação configurável</b> — síndico decide se nome e apartamento são obrigatórios ou opcionais nas solicitações.</span></li>
+              <li className="flex gap-3"><span className="text-emerald-600 font-bold">✓</span><span><b>Resposta, PDF e link público</b> — síndico responde por e-mail/WhatsApp em 1 clique, gera PDF e compartilha o link da solicitação.</span></li>
             </ul>
             <Link to="/cadastrar-condominio" className="mt-8 inline-block bg-slate-900 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-800">
               Quero usar no meu condomínio
@@ -242,18 +261,18 @@ export default function Landing() {
               </svg>
             </div>
             <div className="mt-4 text-center">
-              <div className="font-semibold">Academia · Bloco A</div>
-              <div className="text-xs text-slate-700 mt-1">Reporte um problema · Solicite manutenção</div>
+              <div className="font-semibold">Solicitações</div>
+              <div className="text-xs text-slate-700 mt-1">Aponte a câmera do celular para o código</div>
             </div>
           </div>
         </div>
       </section>
 
       <section id="planos" className="px-4 py-16 bg-white border-t border-slate-200">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-2">Planos simples</h2>
           <p className="text-center text-slate-600 mb-12">Sem fidelidade. Sem taxa de instalação.</p>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
             {planos.map((p) => (
               <div
                 key={p.nome}

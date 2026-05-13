@@ -77,7 +77,7 @@ export default function SolicitacoesMoradores() {
   return (
     <ShellSindico>
       <h1 className="text-2xl font-bold mb-1 text-slate-900">Solicitações dos moradores</h1>
-      <p className="text-sm text-slate-700 mb-4">Acompanhe os reportes recebidos e gerencie os canais (QR Codes) pelos quais os moradores enviam.</p>
+      <p className="text-sm text-slate-700 mb-4">Acompanhe as solicitações recebidas e gerencie os canais (QR Codes) pelos quais os moradores enviam.</p>
 
       <div className="flex gap-1 border-b border-slate-200 mb-6">
         <button
@@ -88,7 +88,7 @@ export default function SolicitacoesMoradores() {
         <button
           onClick={() => setParams({ aba: 'canais' })}
           className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${aba === 'canais' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-700 hover:text-slate-900'}`}>
-          Canais
+          Canais de Solicitações
         </button>
       </div>
 
@@ -323,7 +323,7 @@ function AbaCanais() {
   }
 
   async function excluir(id: string) {
-    if (!confirm('Excluir este canal? O QR Code deixará de funcionar.')) return
+    if (!confirm('Excluir esta solicitação? O QR Code deixará de funcionar.')) return
     await api.delete(`/api/canais-reporte/${id}`)
     await carregar()
   }
@@ -338,15 +338,16 @@ function AbaCanais() {
     <>
       <div className="flex items-center justify-between mb-2 gap-4">
         <p className="text-sm text-slate-700 max-w-2xl">
-          Cada canal gera um QR Code próprio com sua configuração de identificação obrigatória ou opcional.
-          Use canais separados para denúncia anônima, manutenção, reclamações, sugestões — cada um com a regra que fizer sentido.
+          Crie formulários com QR Codes para que os moradores possam enviar reclamações, denúncias, elogios ou sugestões
+          com apenas um escaneamento. Cada envio pode incluir título, descrição e imagens. Você define se a identificação
+          do morador será obrigatória ou opcional — ideal para solicitações anônimas.
         </p>
-        <Button onClick={() => setEdit({ ...NOVO_CANAL })}>+ Novo canal</Button>
+        <Button onClick={() => setEdit({ ...NOVO_CANAL })}>+ Nova solicitação</Button>
       </div>
 
       {canais.length === 0 ? (
         <Card className="p-8 text-center text-slate-700 text-sm mt-4">
-          Nenhum canal criado. Clique em "+ Novo canal" para começar.
+          Nenhuma solicitação criada. Clique em "+ Nova solicitação" para começar.
         </Card>
       ) : (
         <div className="space-y-3 mt-4">
@@ -383,10 +384,10 @@ function AbaCanais() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setEdit(null)}>
           <div className="bg-white rounded-xl border border-slate-200 max-w-lg w-full p-6 text-slate-900" onClick={e => e.stopPropagation()}>
             <div>
-              <h2 className="text-lg font-bold mb-4">{edit.id ? 'Editar canal' : 'Novo canal'}</h2>
+              <h2 className="text-lg font-bold mb-4">{edit.id ? 'Editar solicitação' : 'Nova solicitação'}</h2>
               <div className="space-y-4">
                 <div>
-                  <Label>Nome do canal *</Label>
+                  <Label>Nome da solicitação *</Label>
                   <Input value={edit.nome} onChange={e => setEdit({ ...edit, nome: e.target.value })}
                     placeholder='Ex: "Denúncia anônima", "Manutenção"' maxLength={120} />
                 </div>

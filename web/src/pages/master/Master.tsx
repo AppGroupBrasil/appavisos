@@ -10,8 +10,21 @@ export default function Master() {
   const { logout } = useAuth()
   const nav = useNavigate()
   const [lista, setLista] = useState<Cond[]>([])
+  const [emailProvedor, setEmailProvedor] = useState<'resend' | 'elasticemail'>('resend')
+  const [salvandoProvedor, setSalvandoProvedor] = useState(false)
+
   function carregar() { api.get('/api/master/condominios').then((r) => setLista(r.data)) }
-  useEffect(() => { carregar() }, [])
+  useEffect(() => {
+    carregar()
+    api.get('/api/master/config/email-provedor').then(r => setEmailProvedor(r.data.provedor))
+  }, [])
+
+  async function salvarProvedor(provedor: 'resend' | 'elasticemail') {
+    setSalvandoProvedor(true)
+    await api.put('/api/master/config/email-provedor', { provedor })
+    setEmailProvedor(provedor)
+    setSalvandoProvedor(false)
+  }
 
   async function bloquear(c: Cond) {
     const motivo = c.bloqueado ? null : prompt('Motivo do bloqueio:')
@@ -35,6 +48,23 @@ export default function Master() {
         <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Master — Condomínios</h1>
         <button onClick={() => { logout(); nav('/login') }} className="text-sm text-slate-700 hover:text-slate-900">Sair</button>
       </header>
+
+      <Card className="p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex-1">
+          <div className="text-sm font-medium text-slate-900">Provedor de e-mail</div>
+          <div className="text-xs text-slate-500 mt-0.5">Altere o provedor sem precisar de redeploy.</div>
+        </div>
+        <select
+          value={emailProvedor}
+          onChange={e => salvarProvedor(e.target.value as 'resend' | 'elasticemail')}
+          disabled={salvandoProvedor}
+          className="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-slate-400 disabled:opacity-50"
+        >
+          <option value="resend">Resend</option>
+          <option value="elasticemail">Elastic Email</option>
+        </select>
+        {salvandoProvedor && <span className="text-xs text-slate-400">Salvando…</span>}
+      </Card>
       <div className="space-y-3">
         {lista.map((c) => (
           <Card key={c.id} className="p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">

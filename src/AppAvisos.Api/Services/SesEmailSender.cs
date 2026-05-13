@@ -1,40 +1,35 @@
-using Amazon;
-using Amazon.SimpleEmailV2;
-using Amazon.SimpleEmailV2.Model;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using MimeKit;
 
 namespace AppAvisos.Api.Services;
 
-public class SesEmailSender : IEmailSender
+public class SmtpEmailSender(IConfiguration cfg, ActiveEmailProvider activeProvider) : IEmailSender
 {
-    readonly AmazonSimpleEmailServiceV2Client _client;
-    readonly string _from;
-
-    public SesEmailSender(IConfiguration cfg)
-    {
-        var region = RegionEndpoint.GetBySystemName(cfg["Aws:Region"] ?? "us-east-1");
-        var accessKey = cfg["Aws:AccessKey"];
-        var secretKey = cfg["Aws:SecretKey"];
-        _client = string.IsNullOrEmpty(accessKey)
-            ? new AmazonSimpleEmailServiceV2Client(region)
-            : new AmazonSimpleEmailServiceV2Client(accessKey, secretKey, region);
-        _from = cfg["Email:From"] ?? "noreply@appavisos.com.br";
-    }
+    readonly string _from = cfg["Email:From"] ?? "noreply@appavisos.com.br";
 
     public async Task EnviarAsync(string para, string assunto, string html, CancellationToken ct = default)
     {
-        await _client.SendEmailAsync(new SendEmailRequest
-        {
-            FromEmailAddress = _from,
-            Destination = new Destination { ToAddresses = new List<string> { para } },
-            Content = new EmailContent
-            {
-                Simple = new Message
-                {
-                    Subject = new Content { Data = assunto, Charset = "UTF-8" },
-                    Body = new Body { Html = new Content { Data = html, Charset = "UTF-8" } }
-                }
-            }
-        }, ct);
+        var section = activeProvider.Current == "elasticemail"
+            ? cfg.GetSection("Email:ElasticEmail")
+            : cfg.GetSection("Email:Resend");
+
+        var host = section["SmtpHost"] ?? "smtp.resend.com";
+        var port = int.TryParse(section["SmtpPort"], out var p) ? p : 587;
+        var user = section["SmtpUser"] ?? "";
+        var pass = section["SmtpPass"] ?? "";
+
+        var msg = new MimeMessage();
+        msg.From.Add(MailboxAddress.Parse(_from));
+        msg.To.Add(MailboxAddress.Parse(para));
+        msg.Subject = assunto;
+        msg.Body = new TextPart("html") { Text = html };
+
+        using var client = new SmtpClient();
+        await client.ConnectAsync(host, port, SecureSocketOptions.StartTls, ct);
+        await client.AuthenticateAsync(user, pass, ct);
+        await client.SendAsync(msg, ct);
+        await client.DisconnectAsync(true, ct);
     }
 }
 

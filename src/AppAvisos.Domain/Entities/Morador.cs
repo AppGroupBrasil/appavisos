@@ -18,6 +18,7 @@ public class Morador
     public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
     public DateTime? AprovadoEm { get; set; }
     public bool EmailInvalido { get; set; }
+    public bool NotificacoesEmail { get; set; } = true;
     public string? TokenReset { get; set; }
     public DateTime? TokenResetExpiraEm { get; set; }
     public string? PinHash { get; set; }

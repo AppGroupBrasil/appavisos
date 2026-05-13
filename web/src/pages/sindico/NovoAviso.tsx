@@ -18,6 +18,7 @@ export default function NovoAviso() {
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [areas, setAreas] = useState<Area[]>([])
   const [gerenciarCat, setGerenciarCat] = useState(false)
+  const [gerenciarAreas, setGerenciarAreas] = useState(false)
   const [filtroBloco, setFiltroBloco] = useState('')
   const [busca, setBusca] = useState('')
   const [f, setF] = useState({
@@ -32,11 +33,12 @@ export default function NovoAviso() {
   const [erro, setErro] = useState('')
 
   const carregarCategorias = () => api.get('/api/categorias').then((r) => setCategorias(r.data))
+  const carregarAreas = () => api.get('/api/areas').then((r) => setAreas(r.data))
 
   useEffect(() => {
     api.get('/api/blocos').then((r) => setBlocos(r.data))
     api.get('/api/moradores?status=ativo').then((r) => setMoradores(r.data))
-    api.get('/api/areas').then((r) => setAreas(r.data))
+    carregarAreas()
     carregarCategorias()
   }, [])
 
@@ -150,12 +152,17 @@ export default function NovoAviso() {
 
           {f.escopo === 4 && (
             <div>
-              <Label>Área</Label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-500">Área</label>
+                <button type="button" onClick={() => setGerenciarAreas(true)} className="text-slate-600 hover:text-slate-600 dark:hover:text-slate-200" title="Gerenciar áreas">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+              </div>
               <select value={f.areaId} onChange={(e) => setF({ ...f, areaId: e.target.value })} required className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900">
                 <option value="">Selecione…</option>
                 {areas.map((a) => <option key={a.id} value={a.id}>{a.nome}</option>)}
               </select>
-              <p className="text-xs text-slate-700 mt-1">Aviso visível ao escanear o QR Code da área. Não envia e-mail/push.</p>
+              <p className="text-xs text-slate-700 mt-1">Aviso visível ao escanear o QR Code da área. Não envia e-mail/push. Para cadastrar uma nova área, clique na engrenagem ao lado do campo.</p>
             </div>
           )}
 
@@ -229,8 +236,32 @@ export default function NovoAviso() {
         </div>
       </form>
 
+      <Card className="p-5 mt-6 max-w-2xl border-slate-200 dark:border-slate-700">
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Guia rápido</p>
+        <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-slate-600 dark:text-slate-400">
+          <div><span className="font-medium text-slate-800 dark:text-slate-200">Aviso</span> — comunicação geral do condomínio.</div>
+          <div><span className="font-medium text-slate-800 dark:text-slate-200">Comunicado</span> — informação formal ou oficial.</div>
+          <div><span className="font-medium text-slate-800 dark:text-slate-200">Informativo</span> — novidades e atualizações gerais.</div>
+          <div><span className="font-medium text-slate-800 dark:text-slate-200">Notificação</span> — alerta direto a um morador.</div>
+          <div><span className="font-medium text-slate-800 dark:text-slate-200">Documento</span> — arquivo disponível para consulta.</div>
+          <div><span className="font-medium text-slate-800 dark:text-slate-200">Todo condomínio</span> — todos os moradores ativos recebem.</div>
+          <div><span className="font-medium text-slate-800 dark:text-slate-200">Bloco</span> — somente moradores do bloco selecionado.</div>
+          <div><span className="font-medium text-slate-800 dark:text-slate-200">Morador</span> — enviado diretamente a uma pessoa.</div>
+          <div><span className="font-medium text-slate-800 dark:text-slate-200">Área</span> — visível ao escanear o QR Code da área.</div>
+          <div><span className="font-medium text-slate-800 dark:text-slate-200">Urgente</span> — destaque em vermelho no feed do morador.</div>
+          <div><span className="font-medium text-slate-800 dark:text-slate-200">Fixar no topo</span> — permanece visível mesmo após novos avisos.</div>
+          <div><span className="font-medium text-slate-800 dark:text-slate-200">Agendar para</span> — publica automaticamente na data/hora definida.</div>
+          <div><span className="font-medium text-slate-800 dark:text-slate-200">Válido até</span> — o aviso some do feed após essa data.</div>
+          <div><span className="font-medium text-slate-800 dark:text-slate-200">Anexo</span> — PDF ou imagem enviado junto com o aviso.</div>
+          <div><span className="font-medium text-slate-800 dark:text-slate-200">WhatsApp</span> — abre conversa direta com o morador (escopo individual).</div>
+        </div>
+      </Card>
+
       {gerenciarCat && (
         <ModalCategorias categorias={categorias} onClose={() => setGerenciarCat(false)} onChange={carregarCategorias} />
+      )}
+      {gerenciarAreas && (
+        <ModalAreas areas={areas} onClose={() => setGerenciarAreas(false)} onChange={carregarAreas} />
       )}
     </ShellSindico>
   )
@@ -282,6 +313,63 @@ function ModalCategorias({ categorias, onClose, onChange }: { categorias: Catego
                   <span className="flex-1">{c.nome}</span>
                   <button onClick={() => setEditando({ id: c.id, nome: c.nome })} className="text-slate-700 hover:text-slate-700 text-sm">editar</button>
                   <button onClick={() => excluir(c.id)} className="text-red-500 hover:text-red-700 text-sm">excluir</button>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ModalAreas({ areas, onClose, onChange }: { areas: Area[]; onClose: () => void; onChange: () => void }) {
+  const [nova, setNova] = useState('')
+  const [editando, setEditando] = useState<{ id: string; nome: string } | null>(null)
+
+  async function adicionar(e: React.FormEvent) {
+    e.preventDefault()
+    if (!nova.trim()) return
+    try { await api.post('/api/areas', { nome: nova.trim() }); setNova(''); onChange() }
+    catch (err: any) { alert(err.response?.data?.erro ?? 'Erro') }
+  }
+  async function salvarEdicao() {
+    if (!editando) return
+    try { await api.put(`/api/areas/${editando.id}`, { nome: editando.nome }); setEditando(null); onChange() }
+    catch (err: any) { alert(err.response?.data?.erro ?? 'Erro') }
+  }
+  async function excluir(id: string) {
+    if (!confirm('Excluir área?')) return
+    try { await api.delete(`/api/areas/${id}`); onChange() }
+    catch (err: any) { alert(err.response?.data?.erro ?? 'Erro') }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-semibold text-lg">Gerenciar áreas</h2>
+          <button onClick={onClose} className="text-slate-700">✕</button>
+        </div>
+        <form onSubmit={adicionar} className="flex gap-2 mb-4">
+          <Input value={nova} onChange={(e) => setNova(e.target.value)} placeholder="Ex: Salão de Festas, Piscina…" />
+          <Button type="submit">Adicionar</Button>
+        </form>
+        <div className="space-y-2 max-h-80 overflow-y-auto">
+          {areas.length === 0 && <p className="text-sm text-slate-700">Nenhuma área cadastrada.</p>}
+          {areas.map((a) => (
+            <div key={a.id} className="flex items-center gap-2 p-2 rounded border border-slate-200 dark:border-slate-700">
+              {editando?.id === a.id ? (
+                <>
+                  <Input value={editando.nome} onChange={(e) => setEditando({ ...editando, nome: e.target.value })} className="flex-1" />
+                  <Button type="button" onClick={salvarEdicao}>Salvar</Button>
+                  <Button type="button" variant="ghost" onClick={() => setEditando(null)}>✕</Button>
+                </>
+              ) : (
+                <>
+                  <span className="flex-1 text-sm">{a.nome}</span>
+                  <button onClick={() => setEditando({ id: a.id, nome: a.nome })} className="text-slate-700 hover:text-slate-700 text-sm">editar</button>
+                  <button onClick={() => excluir(a.id)} className="text-red-500 hover:text-red-700 text-sm">excluir</button>
                 </>
               )}
             </div>

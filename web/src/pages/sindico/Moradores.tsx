@@ -12,6 +12,7 @@ export default function Moradores() {
   const [filtro, setFiltro] = useState<'todos' | 'pendente' | 'ativo' | 'inativo'>('todos')
   const [novo, setNovo] = useState(false)
   const [f, setF] = useState({ nome: '', email: '', telefone: '', blocoId: '', apartamento: '' })
+  const [editando, setEditando] = useState<{ id: string; nome: string; email: string; telefone: string; blocoId: string; apartamento: string } | null>(null)
 
   function carregar() {
     const p = filtro === 'todos' ? '' : `?status=${filtro}`
@@ -27,6 +28,13 @@ export default function Moradores() {
   }
   async function aprovar(id: string) { await api.post(`/api/moradores/${id}/aprovar`); carregar() }
   async function inativar(id: string) { if (!confirm('Inativar morador?')) return; await api.post(`/api/moradores/${id}/inativar`); carregar() }
+  async function salvarEdicao(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editando) return
+    await api.put(`/api/moradores/${editando.id}`, { nome: editando.nome, email: editando.email, telefone: editando.telefone, blocoId: editando.blocoId || null, apartamento: editando.apartamento })
+    setEditando(null); carregar()
+  }
+  async function excluir(id: string) { if (!confirm('Excluir morador permanentemente?')) return; try { await api.delete(`/api/moradores/${id}`); carregar() } catch (err: any) { alert(err.response?.data?.erro ?? 'Erro') } }
   async function importarExcel(file: File) {
     const fd = new FormData(); fd.append('file', file)
     const { data } = await api.post('/api/importacao/moradores/preview', fd)
@@ -40,7 +48,12 @@ export default function Moradores() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Moradores</h1>
         <div className="flex gap-2">
-          <a href="/api/importacao/moradores/modelo.xlsx" className="text-sm text-slate-700 hover:text-slate-700 self-center">Baixar modelo</a>
+          <button type="button" onClick={async () => {
+            const r = await api.get('/api/importacao/moradores/modelo.xlsx', { responseType: 'blob' })
+            const url = URL.createObjectURL(r.data)
+            const a = document.createElement('a'); a.href = url; a.download = 'modelo-moradores.xlsx'; a.click()
+            URL.revokeObjectURL(url)
+          }} className="text-sm text-slate-700 hover:text-slate-700 self-center">Baixar modelo</button>
           <label className="cursor-pointer">
             <input type="file" accept=".xlsx" className="hidden" onChange={(e) => e.target.files?.[0] && importarExcel(e.target.files[0])} />
             <span className="inline-block px-4 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-sm font-medium">Importar Excel</span>
@@ -76,15 +89,39 @@ export default function Moradores() {
 
       <div className="space-y-2">
         {[...lista].sort((a, b) => (a.status === 1 ? -1 : 0) - (b.status === 1 ? -1 : 0)).map((m) => (
-          <div key={m.id} className={`p-4 flex items-center justify-between rounded-xl border ${m.status === 1 ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'}`}>
-            <div>
-              <div className="font-medium">{m.nome} {m.status === 1 && <span className="text-xs px-2 py-0.5 rounded bg-amber-200 text-amber-800 ml-2 font-semibold">Aguardando aprovação</span>}</div>
-              <div className="text-xs text-slate-700">{m.email} {m.telefone && `• ${m.telefone}`} {m.apartamento && `• Apto ${m.apartamento}`}</div>
-            </div>
-            <div className="flex gap-2">
-              {m.status === 1 && <Button onClick={() => aprovar(m.id)}>Aprovar</Button>}
-              {m.status !== 3 && <Button variant="ghost" onClick={() => inativar(m.id)}>Inativar</Button>}
-            </div>
+          <div key={m.id} className={`rounded-xl border ${m.status === 1 ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'}`}>
+            {editando?.id === m.id ? (
+              <form onSubmit={salvarEdicao} className="p-4 grid grid-cols-2 gap-3">
+                <div><Label>Nome</Label><Input value={editando.nome} onChange={(e) => setEditando({ ...editando, nome: e.target.value })} required /></div>
+                <div><Label>E-mail</Label><Input type="email" value={editando.email} onChange={(e) => setEditando({ ...editando, email: e.target.value })} required /></div>
+                <div><Label>Telefone</Label><Input value={editando.telefone} onChange={(e) => setEditando({ ...editando, telefone: e.target.value })} /></div>
+                <div><Label>Apartamento</Label><Input value={editando.apartamento} onChange={(e) => setEditando({ ...editando, apartamento: e.target.value })} /></div>
+                <div className="col-span-2">
+                  <Label>Bloco</Label>
+                  <select value={editando.blocoId} onChange={(e) => setEditando({ ...editando, blocoId: e.target.value })} className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900">
+                    <option value="">—</option>
+                    {blocos.map((b) => <option key={b.id} value={b.id}>{b.nome}</option>)}
+                  </select>
+                </div>
+                <div className="col-span-2 flex gap-2">
+                  <Button type="submit">Salvar</Button>
+                  <Button type="button" variant="ghost" onClick={() => setEditando(null)}>Cancelar</Button>
+                </div>
+              </form>
+            ) : (
+              <div className="p-4 flex items-center justify-between gap-4">
+                <div>
+                  <div className="font-medium">{m.nome} {m.status === 1 && <span className="text-xs px-2 py-0.5 rounded bg-amber-200 text-amber-800 ml-2 font-semibold">Aguardando aprovação</span>}</div>
+                  <div className="text-xs text-slate-700">{m.email} {m.telefone && `• ${m.telefone}`} {m.apartamento && `• Apto ${m.apartamento}`}</div>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  {m.status === 1 && <Button onClick={() => aprovar(m.id)}>Aprovar</Button>}
+                  <Button variant="ghost" onClick={() => setEditando({ id: m.id, nome: m.nome, email: m.email, telefone: m.telefone ?? '', blocoId: m.blocoId ?? '', apartamento: m.apartamento ?? '' })}>Editar</Button>
+                  {m.status !== 3 && <Button variant="ghost" onClick={() => inativar(m.id)}>Inativar</Button>}
+                  <Button variant="ghost" onClick={() => excluir(m.id)} className="text-red-500 hover:text-red-700">Excluir</Button>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>

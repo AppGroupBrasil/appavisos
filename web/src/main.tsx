@@ -29,6 +29,10 @@ import Reportar from './pages/Reportar'
 import SolicitacoesMoradores from './pages/sindico/SolicitacoesMoradores'
 import DocumentosSindico from './pages/sindico/Documentos'
 import DocumentosPublico from './pages/morador/Documentos'
+import MeusDocumentos from './pages/morador/MeusDocumentos'
+import MuralPublico from './pages/MuralPublico'
+import MuralArea from './pages/MuralArea'
+import Descadastrar from './pages/Descadastrar'
 
 function Protegida({ children, perfil }: { children: React.ReactNode; perfil?: string | string[] }) {
   const { user } = useAuth()
@@ -50,6 +54,8 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/login" element={<Login />} />
         <Route path="/cadastrar-condominio" element={<CadastroCondominio />} />
         <Route path="/cadastro/:slug" element={<CadastroPublico />} />
+        <Route path="/c/:slug" element={<MuralPublico />} />
+        <Route path="/c/:slug/area/:areaSlug" element={<MuralArea />} />
         <Route path="/c/:slug/reportar" element={<Reportar />} />
         <Route path="/c/:slug/reportar/:canal" element={<Reportar />} />
         <Route path="/painel/solicitacoes" element={<Protegida perfil={Sindico}><SolicitacoesMoradores /></Protegida>} />
@@ -61,10 +67,10 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/ativar-notificacoes" element={<AtivarPush />} />
         <Route path="/recuperar" element={<Recuperar />} />
         <Route path="/redefinir/:token" element={<Redefinir />} />
-        <Route path="/aviso/:id" element={<Protegida perfil="Morador"><DetalheAviso /></Protegida>} />
         <Route path="/c/:slug/aviso/:id" element={<Protegida perfil="Morador"><DetalheAviso /></Protegida>} />
         <Route path="/privacidade" element={<Privacidade />} />
         <Route path="/termos" element={<Termos />} />
+        <Route path="/descadastrar" element={<Descadastrar />} />
 
         <Route path="/painel" element={<Protegida perfil={Sindico}><Avisos /></Protegida>} />
         <Route path="/painel/avisos/novo" element={<Protegida perfil={Sindico}><NovoAviso /></Protegida>} />
@@ -77,6 +83,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/painel/timeline" element={<Protegida perfil={Sindico}><Timeline /></Protegida>} />
 
         <Route path="/feed" element={<Protegida perfil="Morador"><Feed /></Protegida>} />
+        <Route path="/meus-documentos" element={<Protegida perfil="Morador"><MeusDocumentos /></Protegida>} />
         <Route path="/master" element={<Protegida perfil="Master"><Master /></Protegida>} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

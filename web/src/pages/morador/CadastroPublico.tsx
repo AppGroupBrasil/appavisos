@@ -9,12 +9,17 @@ export default function CadastroPublico() {
   const { slug } = useParams()
   const [info, setInfo] = useState<Info | null>(null)
   const [f, setF] = useState({ nome: '', email: '', telefone: '', blocoId: '', apartamento: '', senha: '', pin: '' })
+  const [confirmarEmail, setConfirmarEmail] = useState('')
+  const [confirmarSenha, setConfirmarSenha] = useState('')
   const [erro, setErro] = useState(''); const [ok, setOk] = useState(false); const [loading, setLoading] = useState(false)
 
   useEffect(() => { api.get(`/api/cadastro/info/${slug}`).then((r) => setInfo(r.data)).catch(() => setErro('Condomínio não encontrado')) }, [slug])
 
   async function enviar(e: React.FormEvent) {
-    e.preventDefault(); setErro(''); setLoading(true)
+    e.preventDefault()
+    if (f.email !== confirmarEmail) { setErro('Os e-mails não coincidem'); return }
+    if (f.senha !== confirmarSenha) { setErro('As senhas não coincidem'); return }
+    setErro(''); setLoading(true)
     try {
       await api.post('/api/cadastro/morador', { slug, ...f, blocoId: f.blocoId || null })
       setOk(true)
@@ -45,6 +50,7 @@ export default function CadastroPublico() {
           <form onSubmit={enviar} className="space-y-4">
             <div><Label>Nome completo</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} required /></div>
             <div><Label>E-mail</Label><Input type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} required /></div>
+            <div><Label>Confirmar e-mail</Label><Input type="email" value={confirmarEmail} onChange={(e) => setConfirmarEmail(e.target.value)} required /></div>
             <div><Label>Telefone</Label><Input value={f.telefone} onChange={(e) => setF({ ...f, telefone: e.target.value })} /></div>
             {info && info.blocos.length > 0 && (
               <div>
@@ -57,6 +63,7 @@ export default function CadastroPublico() {
             )}
             <div><Label>Apartamento</Label><Input value={f.apartamento} onChange={(e) => setF({ ...f, apartamento: e.target.value })} /></div>
             <div><Label>Senha (6 dígitos)</Label><Input inputMode="numeric" pattern="\d{6}" maxLength={6} value={f.senha} onChange={(e) => setF({ ...f, senha: e.target.value.replace(/\D/g, '').slice(0, 6) })} required /></div>
+            <div><Label>Confirmar senha</Label><Input inputMode="numeric" pattern="\d{6}" maxLength={6} value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value.replace(/\D/g, '').slice(0, 6))} required /></div>
             <div>
               <Label>PIN para documentos (4 dígitos)</Label>
               <Input inputMode="numeric" pattern="\d{4}" maxLength={4}

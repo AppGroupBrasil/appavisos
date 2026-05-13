@@ -83,6 +83,17 @@ public class QrController(AppDbContext db, CurrentUser user, IConfiguration cfg)
         return File(GerarPng($"{BaseUrl}/c/{data.CondSlug}/reportar/{data.Token}", tamanho), "image/png");
     }
 
+    [HttpGet("personalizado/{id:guid}.png")]
+    [Authorize(Roles = "Sindico,Subsindico")]
+    public async Task<IActionResult> QrPersonalizado(Guid id, [FromQuery] int tamanho = 12)
+    {
+        var url = await db.QrPersonalizados.AsNoTracking()
+            .Where(x => x.Id == id && x.CondominioId == user.CondominioId)
+            .Select(x => x.Url).FirstOrDefaultAsync();
+        if (url is null) return NotFound();
+        return File(GerarPng(url, tamanho), "image/png");
+    }
+
     [HttpGet("/q/{token}")]
     public async Task<IActionResult> Resolver(string token)
     {

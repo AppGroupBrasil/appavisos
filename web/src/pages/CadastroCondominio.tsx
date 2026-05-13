@@ -8,6 +8,8 @@ export default function CadastroCondominio() {
   const nav = useNavigate()
   const { setUser } = useAuth()
   const [f, setF] = useState({ nomeCondominio: '', nomeSindico: '', email: '', telefone: '', senha: '', cnpj: '' })
+  const [confirmarEmail, setConfirmarEmail] = useState('')
+  const [confirmarSenha, setConfirmarSenha] = useState('')
 
   function formatarCnpj(v: string) {
     const d = v.replace(/\D/g, '').slice(0, 14)
@@ -22,6 +24,8 @@ export default function CadastroCondominio() {
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault()
+    if (f.email !== confirmarEmail) { setErro('Os e-mails não coincidem'); return }
+    if (f.senha !== confirmarSenha) { setErro('As senhas não coincidem'); return }
     setErro(''); setLoading(true)
     try {
       const { data } = await api.post('/api/cadastro/condominio', f)
@@ -44,9 +48,11 @@ export default function CadastroCondominio() {
             <div><Label>Nome do condomínio</Label><Input value={f.nomeCondominio} onChange={(e) => setF({ ...f, nomeCondominio: e.target.value })} required /></div>
             <div><Label>Seu nome</Label><Input value={f.nomeSindico} onChange={(e) => setF({ ...f, nomeSindico: e.target.value })} required /></div>
             <div><Label>E-mail</Label><Input type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} required /></div>
+            <div><Label>Confirmar e-mail</Label><Input type="email" value={confirmarEmail} onChange={(e) => setConfirmarEmail(e.target.value)} required /></div>
             <div><Label>Telefone</Label><Input value={f.telefone} onChange={(e) => setF({ ...f, telefone: e.target.value })} placeholder="(11) 99999-9999" /></div>
             <div><Label>CNPJ do condomínio (opcional, facilita o cadastro dos moradores)</Label><Input value={f.cnpj} onChange={(e) => setF({ ...f, cnpj: formatarCnpj(e.target.value) })} placeholder="00.000.000/0000-00" /></div>
-            <div><Label>Senha (6 dígitos)</Label><Input inputMode="numeric" pattern="\d{6}" maxLength={6} value={f.senha} onChange={(e) => setF({ ...f, senha: e.target.value })} required /></div>
+            <div><Label>Senha (6 dígitos)</Label><Input inputMode="numeric" pattern="\d{6}" maxLength={6} value={f.senha} onChange={(e) => setF({ ...f, senha: e.target.value.replace(/\D/g, '').slice(0, 6) })} required /></div>
+            <div><Label>Confirmar senha</Label><Input inputMode="numeric" pattern="\d{6}" maxLength={6} value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value.replace(/\D/g, '').slice(0, 6))} required /></div>
             {erro && <div className="text-sm text-red-600">{erro}</div>}
             <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Cadastrando…' : 'Cadastrar'}</Button>
           </form>

@@ -80,7 +80,7 @@ public class CadastroController(AppDbContext db, JwtService jwt) : ControllerBas
             db.Categorias.Add(new CategoriaAviso { CondominioId = condominioId, Nome = defaults[i], Ordem = i + 1 });
     }
 
-    static string Slugify(string s)
+    public static string Slugify(string s)
     {
         var n = s.Trim().ToLowerInvariant();
         n = Regex.Replace(n, @"[áàâãä]", "a");

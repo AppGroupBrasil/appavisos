@@ -38,9 +38,14 @@ services:
       Master__Senha: ${MASTER_SENHA}
       AppUrl: https://app.appavisos.com.br
       Email__From: ${EMAIL_FROM}
-      Aws__Region: ${AWS_REGION}
-      Aws__AccessKey: ${AWS_ACCESS_KEY}
-      Aws__SecretKey: ${AWS_SECRET_KEY}
+      Email__Resend__SmtpHost: smtp.resend.com
+      Email__Resend__SmtpPort: "587"
+      Email__Resend__SmtpUser: resend
+      Email__Resend__SmtpPass: ${EMAIL_RESEND_PASS}
+      Email__ElasticEmail__SmtpHost: smtp.elasticemail.com
+      Email__ElasticEmail__SmtpPort: "2525"
+      Email__ElasticEmail__SmtpUser: eddnportugal@gmail.com
+      Email__ElasticEmail__SmtpPass: ${EMAIL_ELASTIC_PASS}
       Vapid__Subject: ${VAPID_SUBJECT}
       Vapid__PublicKey: ${VAPID_PUBLIC}
       Vapid__PrivateKey: ${VAPID_PRIVATE}

@@ -55,15 +55,41 @@ export default function Reportar() {
       .catch(() => setErro('Condomínio ou canal não encontrado'))
   }, [slug, canal])
 
+  function comprimirImagem(file: File): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file)
+      const img = new Image()
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        const MAX = 1920
+        let { width, height } = img
+        if (width > MAX || height > MAX) {
+          if (width > height) { height = Math.round(height * MAX / width); width = MAX }
+          else { width = Math.round(width * MAX / height); height = MAX }
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height)
+        canvas.toBlob(
+          blob => blob ? resolve(blob) : reject(new Error('Falha ao comprimir')),
+          'image/jpeg', 0.82
+        )
+      }
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Imagem inválida')) }
+      img.src = url
+    })
+  }
+
   async function adicionarFoto(files: FileList | null) {
     if (!files || files.length === 0) return
     setErro('')
     for (const f of Array.from(files)) {
       if (fotos.length >= 5) { setErro('Máximo de 5 fotos'); break }
-      if (f.size > 5 * 1024 * 1024) { setErro(`${f.name} acima de 5MB`); continue }
-      const fd = new FormData()
-      fd.append('file', f)
       try {
+        const blob = await comprimirImagem(f)
+        const fd = new FormData()
+        fd.append('file', blob, 'foto.jpg')
         const r = await api.post(`/api/publico/reportes/${slug}/foto`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
         setFotos(p => [...p, r.data.url])
       } catch {

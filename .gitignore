@@ -9,3 +9,4 @@ dist/
 .env
 appsettings.Development.json
 src/AppAvisos.Api/uploads/
+CREDENCIAIS.md

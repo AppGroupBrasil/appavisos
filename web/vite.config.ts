@@ -30,9 +30,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': 'http://localhost:5000',
-      '/uploads': 'http://localhost:5000',
-      '/q': 'http://localhost:5000',
+      '/api': { target: 'https://api.appavisos.com.br', changeOrigin: true, secure: true },
+      '/uploads': { target: 'https://api.appavisos.com.br', changeOrigin: true, secure: true },
+      '/q': { target: 'https://api.appavisos.com.br', changeOrigin: true, secure: true },
     },
   },
 })

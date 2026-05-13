@@ -1,4 +1,5 @@
 using AppAvisos.Api.Auth;
+using AppAvisos.Api.Services;
 using AppAvisos.Domain.Entities;
 using AppAvisos.Domain.Enums;
 using AppAvisos.Infrastructure.Persistence;
@@ -11,7 +12,7 @@ namespace AppAvisos.Api.Controllers;
 [ApiController]
 [Route("api/master")]
 [Authorize(Roles = "Master")]
-public class MasterController(AppDbContext db) : ControllerBase
+public class MasterController(AppDbContext db, ActiveEmailProvider activeEmail) : ControllerBase
 {
     public record CondominioDto(Guid Id, string Nome, string Slug, string? EmailContato, string? TelefoneContato,
         bool Bloqueado, bool Inadimplente, DateTime? UltimoPagamentoEm, string? MotivoBloqueio,
@@ -88,6 +89,30 @@ public class MasterController(AppDbContext db) : ControllerBase
         return NoContent();
     }
 
+    [HttpGet("config/email-provedor")]
+    public IActionResult GetEmailProvedor() => Ok(new { provedor = activeEmail.Current });
+
+    public record SetEmailProvedorReq(string Provedor);
+
+    [HttpPut("config/email-provedor")]
+    public async Task<IActionResult> SetEmailProvedor(SetEmailProvedorReq req)
+    {
+        if (req.Provedor != "resend" && req.Provedor != "elasticemail")
+            return BadRequest(new { erro = "Provedor inválido" });
+
+        var cfg = await db.ConfiguracoesSistema.FindAsync("email_provedor");
+        if (cfg is null)
+            db.ConfiguracoesSistema.Add(new ConfiguracaoSistema { Chave = "email_provedor", Valor = req.Provedor });
+        else
+        {
+            cfg.Valor = req.Provedor;
+            cfg.AtualizadoEm = DateTime.UtcNow;
+        }
+        await db.SaveChangesAsync();
+        activeEmail.Current = req.Provedor;
+        return NoContent();
+    }
+
     public record CriarCondominioReq(string NomeCondominio, string NomeSindico, string Email, string Telefone, string Senha);
 
     [HttpPost("condominios")]
@@ -96,9 +121,10 @@ public class MasterController(AppDbContext db) : ControllerBase
         if (await db.Usuarios.AnyAsync(u => u.Email == req.Email.ToLower()))
             return Conflict(new { erro = "E-mail já em uso" });
 
-        var slug = req.NomeCondominio.ToLowerInvariant().Replace(" ", "-");
+        var basePart = CadastroController.Slugify(req.NomeCondominio);
+        var slug = basePart;
         var i = 2;
-        while (await db.Condominios.AnyAsync(c => c.Slug == slug)) slug = $"{slug}-{i++}";
+        while (await db.Condominios.AnyAsync(c => c.Slug == slug)) slug = $"{basePart}-{i++}";
 
         var cond = new Condominio { Nome = req.NomeCondominio, Slug = slug, TelefoneContato = req.Telefone };
         var sindico = new Usuario
@@ -111,6 +137,7 @@ public class MasterController(AppDbContext db) : ControllerBase
         };
         db.Condominios.Add(cond);
         db.Usuarios.Add(sindico);
+        CadastroController.SeedCategorias(db, cond.Id);
         await db.SaveChangesAsync();
         return Ok(new { cond.Id, cond.Slug });
     }

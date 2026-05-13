@@ -4,8 +4,9 @@ import { useAuth } from '../../lib/auth'
 import { Card } from '../../components/ui'
 import { Link, useNavigate } from 'react-router-dom'
 
+
 type Item = { avisoId: string; titulo: string; texto: string; categoria: string; urgente: boolean; fixado: boolean; publicadoEm: string; anexoUrl?: string; anexoNome?: string; cienteEm?: string; resposta?: string }
-type Identidade = { nome: string; logoUrl?: string; descricaoCurta?: string; corPrimaria?: string }
+type Identidade = { nome: string; slug: string; logoUrl?: string; descricaoCurta?: string; corPrimaria?: string }
 
 export default function Feed() {
   const { user, logout } = useAuth()
@@ -30,14 +31,15 @@ export default function Feed() {
             <div className="font-semibold truncate">{ident?.nome ?? 'Carregando…'}</div>
             {ident?.descricaoCurta && <div className="text-xs text-slate-700 truncate">{ident.descricaoCurta}</div>}
           </div>
+          <Link to="/meus-documentos" className="text-sm text-slate-600 hover:text-slate-900">Documentos</Link>
           <button onClick={() => { logout(); nav('/login') }} className="text-sm text-slate-700">Sair</button>
         </div>
       </header>
       <main className="max-w-2xl mx-auto px-4 py-4 space-y-3">
         <div className="text-sm text-slate-700">Olá, {user?.nome}</div>
         {itens.length === 0 && <div className="text-center py-12 text-slate-700">Nenhum aviso no momento.</div>}
-        {itens.map((a) => (
-          <Link key={a.avisoId} to={`/aviso/${a.avisoId}`} className="block">
+        {ident && itens.map((a) => (
+          <Link key={a.avisoId} to={`/c/${ident.slug}/aviso/${a.avisoId}`} className="block">
             <Card className="p-5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
               <div className="flex items-center gap-2 mb-2">
                 {a.fixado && <span className="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-700">📌</span>}
