@@ -10,3 +10,5 @@ dist/
 appsettings.Development.json
 src/AppAvisos.Api/uploads/
 CREDENCIAIS.md
+
+appsettings.Production.json

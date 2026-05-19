@@ -84,18 +84,56 @@ else
 
 builder.Services.AddHostedService<AppAvisos.Api.Workers.EnvioWorker>();
 
+// Aceita JWT local + JWT do auth-central (mesma chave HS256, issuers/audiences distintos)
+var validIssuers = new List<string> { builder.Configuration["Jwt:Issuer"] ?? "" };
+var centralIssuer = builder.Configuration["AuthCentral:Issuer"] ?? "auth.appgroupebrasil.com.br";
+if (!string.IsNullOrWhiteSpace(centralIssuer)) validIssuers.Add(centralIssuer);
+
+var validAudiences = new List<string> { builder.Configuration["Jwt:Audience"] ?? "" };
+const string AppSlug = "app-avisos";
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(o =>
     {
         o.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidateAudience = true,
+            ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidIssuers = validIssuers,
+            ValidAudiences = validAudiences,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+        o.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = ctx =>
+            {
+                var issuer = ctx.Principal?.FindFirst("iss")?.Value;
+                if (issuer == centralIssuer)
+                {
+                    // Token do auth-central — array apps[] vira N claims "apps", cada uma JSON
+                    var appClaims = ctx.Principal?.FindAll("apps") ?? Enumerable.Empty<System.Security.Claims.Claim>();
+                    var ok = false;
+                    foreach (var c in appClaims)
+                    {
+                        try
+                        {
+                            using var doc = System.Text.Json.JsonDocument.Parse(c.Value);
+                            var root = doc.RootElement;
+                            if (root.TryGetProperty("slug", out var slugEl) && slugEl.GetString() == AppSlug)
+                            {
+                                var st = root.TryGetProperty("status", out var stEl) ? stEl.GetString() : null;
+                                if (st == "ativa" || st == "trial") ok = true;
+                                break;
+                            }
+                        }
+                        catch { /* ignora claim mal formada */ }
+                    }
+                    if (!ok) ctx.Fail("Sem licença ativa para App Avisos");
+                }
+                return Task.CompletedTask;
+            }
         };
     });
 builder.Services.AddAuthorization();
