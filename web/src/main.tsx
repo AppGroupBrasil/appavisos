@@ -33,6 +33,7 @@ import MeusDocumentos from './pages/morador/MeusDocumentos'
 import MuralPublico from './pages/MuralPublico'
 import MuralArea from './pages/MuralArea'
 import Descadastrar from './pages/Descadastrar'
+import ExcluirConta from './pages/ExcluirConta'
 
 function Protegida({ children, perfil }: { children: React.ReactNode; perfil?: string | string[] }) {
   const { user } = useAuth()
@@ -71,6 +72,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/privacidade" element={<Privacidade />} />
         <Route path="/termos" element={<Termos />} />
         <Route path="/descadastrar" element={<Descadastrar />} />
+        <Route path="/excluir-conta" element={<ExcluirConta />} />
 
         <Route path="/painel" element={<Protegida perfil={Sindico}><Avisos /></Protegida>} />
         <Route path="/painel/avisos/novo" element={<Protegida perfil={Sindico}><NovoAviso /></Protegida>} />

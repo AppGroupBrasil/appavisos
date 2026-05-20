@@ -61,7 +61,10 @@ export default function Landing() {
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <header className="border-b border-slate-200 bg-white">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="font-bold text-lg">App Avisos</div>
+          <div className="flex items-center gap-2">
+            <img src="/icon-192.png" alt="App Avisos" className="w-9 h-9 rounded-lg" />
+            <div className="font-bold text-lg">App Avisos</div>
+          </div>
           <nav className="flex items-center gap-2 sm:gap-4 text-sm">
             <a href="#funcionalidades" className="hidden sm:inline text-slate-600 hover:text-slate-900">Funcionalidades</a>
             <a href="#qrcodes" className="hidden sm:inline text-slate-600 hover:text-slate-900">QR Codes</a>

@@ -15,8 +15,8 @@ export default defineConfig({
         name: 'App Avisos',
         short_name: 'App Avisos',
         description: 'Avisos do seu condomínio',
-        theme_color: '#0F172A',
-        background_color: '#F8FAFC',
+        theme_color: '#1E1E1E',
+        background_color: '#1E1E1E',
         display: 'standalone',
         start_url: '/',
         icons: [

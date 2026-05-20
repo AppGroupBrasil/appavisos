@@ -20,7 +20,10 @@ export function ShellSindico({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-full grid md:grid-cols-[240px_1fr]">
       <aside className="bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 flex flex-col">
-        <div className="font-bold text-lg mb-1">App Avisos</div>
+        <div className="flex items-center gap-2 mb-1">
+          <img src="/icon-192.png" alt="App Avisos" className="w-8 h-8 rounded-md" />
+          <div className="font-bold text-lg">App Avisos</div>
+        </div>
         <div className="text-xs text-slate-700 mb-6">{user?.nome}</div>
         <nav className="flex-1 space-y-1">
           {links.map(([to, label]) => (
