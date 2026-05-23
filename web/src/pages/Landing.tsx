@@ -25,9 +25,9 @@ const features = [
 
 const planos = [
   {
-    nome: 'Profissional',
+    nome: '1 condomínio',
     preco: 199,
-    sub: 'a partir de 101 unidades',
+    sub: 'unidades ilimitadas',
     bullets: [
       'Avisos ilimitados por e-mail e push',
       'Solicitações com protocolo público',
@@ -46,7 +46,7 @@ const planos = [
     preco: 350,
     sub: 'condomínios ilimitados',
     bullets: [
-      'Tudo do plano Profissional',
+      'Tudo do plano de 1 condomínio',
       'Painel Master multi-condomínio',
       'Bloqueio e gestão de inadimplência',
       'Onboarding assistido',
