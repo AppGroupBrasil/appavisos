@@ -1,11 +1,9 @@
 using System.Text;
-using System.Threading.RateLimiting;
 using AppAvisos.Api.Auth;
 using AppAvisos.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
@@ -49,22 +47,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
 builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>("postgres", tags: new[] { "ready" });
-
-builder.Services.AddRateLimiter(o =>
-{
-    o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    static string ClientIp(HttpContext ctx)
-    {
-        var cf = ctx.Request.Headers["CF-Connecting-IP"].ToString();
-        if (!string.IsNullOrEmpty(cf)) return cf.Trim();
-        var xff = ctx.Request.Headers["X-Forwarded-For"].ToString();
-        if (!string.IsNullOrEmpty(xff)) return xff.Split(',')[0].Trim();
-        return ctx.Connection.RemoteIpAddress?.ToString() ?? "anon";
-    }
-    o.AddPolicy("auth", ctx =>
-        RateLimitPartition.GetFixedWindowLimiter(ClientIp(ctx),
-            _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
-});
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
@@ -165,7 +147,6 @@ app.UseStaticFiles(new Microsoft.AspNetCore.Builder.StaticFileOptions
 });
 
 app.UseCors();
-app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSerilogRequestLogging();

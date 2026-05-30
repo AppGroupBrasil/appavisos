@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { api } from '../../lib/api'
+import { api, msgErro } from '../../lib/api'
 import { Button, Card, Input, Label } from '../../components/ui'
 
 export default function EncontrarCondominio() {
@@ -34,8 +34,8 @@ export default function EncontrarCondominio() {
         await api.get(`/api/cadastro/info/${s}`)
         nav(`/cadastro/${s}`)
       }
-    } catch (err: any) {
-      setErro(err.response?.data?.erro ?? 'Condomínio não encontrado. Confira com o síndico.')
+    } catch (err) {
+      setErro(msgErro(err, 'Condomínio não encontrado. Confira com o síndico.'))
     } finally { setLoading(false) }
   }
 

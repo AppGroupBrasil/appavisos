@@ -7,7 +7,6 @@ using AppAvisos.Domain.Enums;
 using AppAvisos.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppAvisos.Api.Controllers;
@@ -56,7 +55,6 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
         Guid? AreaId, string? Canal);
 
     [HttpPost("publico/reportes/{slug}")]
-    [EnableRateLimiting("auth")]
     public async Task<IActionResult> Criar(string slug, CriarReporteReq req)
     {
         var cond = await db.Condominios.FirstOrDefaultAsync(c => c.Slug == slug && !c.Bloqueado);
@@ -117,7 +115,6 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
     }
 
     [HttpPost("publico/reportes/{slug}/foto")]
-    [EnableRateLimiting("auth")]
     public async Task<IActionResult> UploadFoto(string slug, IFormFile file)
     {
         var cond = await db.Condominios.AsNoTracking().FirstOrDefaultAsync(c => c.Slug == slug && !c.Bloqueado);
@@ -261,7 +258,6 @@ public class ReportesController(AppDbContext db, CurrentUser user, IWebHostEnvir
     }
 
     [HttpGet("publico/protocolo/{numero}")]
-    [EnableRateLimiting("auth")]
     public async Task<IActionResult> ConsultarProtocolo(string numero)
     {
         if (!System.Text.RegularExpressions.Regex.IsMatch(numero ?? "", @"^\d{6}$"))

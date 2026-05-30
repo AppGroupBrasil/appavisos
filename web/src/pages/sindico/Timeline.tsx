@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../../lib/api'
 import { ShellSindico } from '../../components/Layout'
@@ -43,7 +43,7 @@ export default function Timeline() {
   const [carregando, setCarregando] = useState(false)
   const [f, setF] = useState({ tipo: '', subtipo: '', q: '', protocolo: '', de: '', ate: '' })
 
-  function montarQuery() {
+  const montarQuery = useCallback(() => {
     const p = new URLSearchParams()
     if (f.tipo) p.set('tipo', f.tipo)
     if (f.subtipo) p.set('subtipo', f.subtipo)
@@ -52,20 +52,20 @@ export default function Timeline() {
     if (f.de) p.set('de', f.de)
     if (f.ate) p.set('ate', f.ate)
     return p
-  }
+  }, [f])
 
-  async function carregar() {
+  const carregar = useCallback(async () => {
     setCarregando(true)
     try {
       const r = await api.get(`/api/timeline/feed?${montarQuery()}`)
       setItens(r.data)
     } finally { setCarregando(false) }
-  }
+  }, [montarQuery])
 
   useEffect(() => {
     const t = setTimeout(carregar, 300)
     return () => clearTimeout(t)
-  }, [f])
+  }, [carregar])
 
   function limpar() {
     setF({ tipo: '', subtipo: '', q: '', protocolo: '', de: '', ate: '' })

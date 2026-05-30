@@ -3,7 +3,6 @@ using AppAvisos.Api.Services;
 using AppAvisos.Domain.Enums;
 using AppAvisos.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppAvisos.Api.Controllers;
@@ -37,7 +36,6 @@ public class DocumentosPublicoController(AppDbContext db, JwtService jwt, IEmail
     public record AuthReq(string Identificador, string Pin);
 
     [HttpPost("{slug}/documentos/auth")]
-    [EnableRateLimiting("auth")]
     public async Task<IActionResult> Autenticar(string slug, AuthReq req)
     {
         var cond = await db.Condominios.AsNoTracking().FirstOrDefaultAsync(c => c.Slug == slug && !c.Bloqueado);
@@ -60,7 +58,6 @@ public class DocumentosPublicoController(AppDbContext db, JwtService jwt, IEmail
     public record RecuperarPinReq(string Email);
 
     [HttpPost("{slug}/documentos/recuperar-pin")]
-    [EnableRateLimiting("auth")]
     public async Task<IActionResult> RecuperarPin(string slug, RecuperarPinReq req)
     {
         var cond = await db.Condominios.AsNoTracking().FirstOrDefaultAsync(c => c.Slug == slug && !c.Bloqueado);

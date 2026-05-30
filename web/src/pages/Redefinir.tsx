@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { api } from '../lib/api'
+import { api, msgErro } from '../lib/api'
 import { Button, Card, Input, Label } from '../components/ui'
 
 export default function Redefinir() {
@@ -20,8 +20,8 @@ export default function Redefinir() {
       await api.post('/api/auth/redefinir', { token, senha })
       setOk(true)
       setTimeout(() => nav('/login'), 2000)
-    } catch (err: any) {
-      setErro(err.response?.data?.erro ?? 'Erro')
+    } catch (err) {
+      setErro(msgErro(err, 'Erro'))
     } finally { setLoading(false) }
   }
 

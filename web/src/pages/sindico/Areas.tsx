@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api } from '../../lib/api'
+import { api, msgErro } from '../../lib/api'
 import { ShellSindico } from '../../components/Layout'
 import { Button, Card, Input } from '../../components/ui'
 
@@ -15,7 +15,7 @@ export default function Areas() {
 
   async function criar(e: React.FormEvent) { e.preventDefault(); await api.post('/api/areas', { nome }); setNome(''); carregar() }
   async function salvarEdicao() { if (!editando) return; await api.put(`/api/areas/${editando.id}`, { nome: editando.nome }); setEditando(null); carregar() }
-  async function excluir(id: string) { if (!confirm('Excluir área?')) return; try { await api.delete(`/api/areas/${id}`); carregar() } catch (err: any) { alert(err.response?.data?.erro ?? 'Erro') } }
+  async function excluir(id: string) { if (!confirm('Excluir área?')) return; try { await api.delete(`/api/areas/${id}`); carregar() } catch (err) { alert(msgErro(err, 'Erro')) } }
 
   return (
     <ShellSindico>

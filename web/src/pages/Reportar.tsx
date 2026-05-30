@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
-import { api } from '../lib/api'
+import { api, msgErro } from '../lib/api'
 import { Button, Input, Label, Textarea, Card } from '../components/ui'
 
 type Config = {
@@ -114,8 +114,8 @@ export default function Reportar() {
         canal: canal || null
       })
       setSucesso({ link: r.data.linkPublico, protocolo: r.data.protocolo })
-    } catch (e: any) {
-      setErro(e?.response?.data?.erro ?? 'Erro ao enviar')
+    } catch (e) {
+      setErro(msgErro(e, 'Erro ao enviar'))
     } finally { setEnviando(false) }
   }
 

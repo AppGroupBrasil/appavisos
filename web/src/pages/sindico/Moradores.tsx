@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { api } from '../../lib/api'
+import { useCallback, useEffect, useState } from 'react'
+import { api, msgErro } from '../../lib/api'
 import { ShellSindico } from '../../components/Layout'
 import { Button, Card, Input, Label } from '../../components/ui'
 
@@ -14,11 +14,11 @@ export default function Moradores() {
   const [f, setF] = useState({ nome: '', email: '', telefone: '', blocoId: '', apartamento: '' })
   const [editando, setEditando] = useState<{ id: string; nome: string; email: string; telefone: string; blocoId: string; apartamento: string } | null>(null)
 
-  function carregar() {
+  const carregar = useCallback(() => {
     const p = filtro === 'todos' ? '' : `?status=${filtro}`
     api.get('/api/moradores' + p).then((r) => setLista(r.data))
-  }
-  useEffect(() => { carregar() }, [filtro])
+  }, [filtro])
+  useEffect(() => { carregar() }, [carregar])
   useEffect(() => { api.get('/api/blocos').then((r) => setBlocos(r.data)) }, [])
 
   async function criar(e: React.FormEvent) {
@@ -34,7 +34,7 @@ export default function Moradores() {
     await api.put(`/api/moradores/${editando.id}`, { nome: editando.nome, email: editando.email, telefone: editando.telefone, blocoId: editando.blocoId || null, apartamento: editando.apartamento })
     setEditando(null); carregar()
   }
-  async function excluir(id: string) { if (!confirm('Excluir morador permanentemente?')) return; try { await api.delete(`/api/moradores/${id}`); carregar() } catch (err: any) { alert(err.response?.data?.erro ?? 'Erro') } }
+  async function excluir(id: string) { if (!confirm('Excluir morador permanentemente?')) return; try { await api.delete(`/api/moradores/${id}`); carregar() } catch (err) { alert(msgErro(err, 'Erro')) } }
   async function importarExcel(file: File) {
     const fd = new FormData(); fd.append('file', file)
     const { data } = await api.post('/api/importacao/moradores/preview', fd)

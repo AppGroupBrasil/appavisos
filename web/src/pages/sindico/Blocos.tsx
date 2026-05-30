@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api } from '../../lib/api'
+import { api, msgErro } from '../../lib/api'
 import { ShellSindico } from '../../components/Layout'
 import { Button, Card, Input, Label } from '../../components/ui'
 
@@ -16,7 +16,7 @@ export default function Blocos() {
 
   async function criar(e: React.FormEvent) { e.preventDefault(); await api.post('/api/blocos', { nome }); setNome(''); carregar() }
   async function gerar(e: React.FormEvent) { e.preventDefault(); await api.post('/api/blocos/gerar', g); carregar() }
-  async function excluir(id: string) { if (!confirm('Excluir bloco?')) return; try { await api.delete(`/api/blocos/${id}`); carregar() } catch (err: any) { alert(err.response?.data?.erro ?? 'Erro') } }
+  async function excluir(id: string) { if (!confirm('Excluir bloco?')) return; try { await api.delete(`/api/blocos/${id}`); carregar() } catch (err) { alert(msgErro(err, 'Erro')) } }
 
   return (
     <ShellSindico>

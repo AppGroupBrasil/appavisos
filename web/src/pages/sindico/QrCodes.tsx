@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '../../lib/api'
 import { ShellSindico } from '../../components/Layout'
 import { Card } from '../../components/ui'
@@ -296,12 +296,14 @@ function QrComBotao({
   endpoint: string; arquivo: string; onLoad?: (url: string) => void
 }) {
   const [src, setSrc] = useState<string | null>(null)
+  const onLoadRef = useRef(onLoad)
+  useEffect(() => { onLoadRef.current = onLoad }, [onLoad])
 
   useEffect(() => {
     api.get(endpoint, { responseType: 'blob' }).then(r => {
       const url = URL.createObjectURL(r.data)
       setSrc(url)
-      onLoad?.(url)
+      onLoadRef.current?.(url)
     })
   }, [endpoint])
 

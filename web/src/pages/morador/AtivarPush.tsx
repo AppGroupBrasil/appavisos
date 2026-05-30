@@ -31,11 +31,11 @@ export default function AtivarPush() {
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(chave),
       })
-      const j = sub.toJSON() as any
-      await api.post('/api/push/assinar', { endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth })
+      const j = sub.toJSON()
+      await api.post('/api/push/assinar', { endpoint: j.endpoint, p256dh: j.keys?.p256dh, auth: j.keys?.auth })
       setEstado('ok')
-    } catch (err: any) {
-      setEstado('erro'); setMsg(err.message ?? 'Erro')
+    } catch (err) {
+      setEstado('erro'); setMsg(err instanceof Error ? err.message : 'Erro')
     }
   }
 

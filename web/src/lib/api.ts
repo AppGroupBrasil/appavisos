@@ -1,6 +1,11 @@
-import axios from 'axios'
+import axios, { isAxiosError } from 'axios'
 
 export const api = axios.create({ baseURL: '/' })
+
+export function msgErro(err: unknown, fallback = 'Ocorreu um erro. Tente novamente.'): string {
+  if (isAxiosError(err)) return err.response?.data?.erro ?? err.response?.data?.message ?? fallback
+  return fallback
+}
 
 api.interceptors.request.use((cfg) => {
   const t = localStorage.getItem('token')

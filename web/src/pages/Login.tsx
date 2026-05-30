@@ -1,34 +1,27 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { isAxiosError } from 'axios'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { Button, Input, Label, Card } from '../components/ui'
 
 const SUPORTE = '5511933284364'
 
+function lerLoginLembrado(): { email?: string; senha?: string; tipo?: 'sindico' | 'morador' } | null {
+  try { return JSON.parse(localStorage.getItem('login-lembrado') || 'null') } catch { return null }
+}
+
 export default function Login() {
   const nav = useNavigate()
   const { setUser } = useAuth()
-  const [email, setEmail] = useState('')
-  const [senha, setSenha] = useState('')
+  const salvo = lerLoginLembrado()
+  const [email, setEmail] = useState(salvo?.email ?? '')
+  const [senha, setSenha] = useState(salvo?.senha ?? '')
   const [show, setShow] = useState(false)
   const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(false)
-  const [tipo, setTipo] = useState<'sindico' | 'morador'>('sindico')
-  const [lembrar, setLembrar] = useState(false)
-
-  useEffect(() => {
-    const salvo = localStorage.getItem('login-lembrado')
-    if (salvo) {
-      try {
-        const d = JSON.parse(salvo)
-        setEmail(d.email ?? '')
-        setSenha(d.senha ?? '')
-        setTipo(d.tipo ?? 'sindico')
-        setLembrar(true)
-      } catch { /* ignora */ }
-    }
-  }, [])
+  const [tipo, setTipo] = useState<'sindico' | 'morador'>(salvo?.tipo ?? 'sindico')
+  const [lembrar, setLembrar] = useState(!!salvo)
 
   async function entrar(e: React.FormEvent) {
     e.preventDefault()
@@ -41,8 +34,8 @@ export default function Login() {
       if (data.perfil === 'Master') nav('/master')
       else if (data.perfil === 'Morador') nav('/feed')
       else nav('/painel')
-    } catch (err: any) {
-      setErro(err.response?.data?.erro ?? 'Erro ao entrar')
+    } catch (err) {
+      setErro((isAxiosError(err) ? err.response?.data?.erro : null) ?? 'Erro ao entrar')
     } finally { setLoading(false) }
   }
 

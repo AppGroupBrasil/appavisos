@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { api } from '../../lib/api'
 import { Button, Card } from '../../components/ui'
@@ -17,27 +17,28 @@ export default function DetalheAviso() {
   const [novaMsg, setNovaMsg] = useState('')
   const respRef = useRef<HTMLTextAreaElement>(null)
 
-  function carregar() {
+  const carregar = useCallback(() => {
     api.get(`/api/avisos/${id}/morador`).then((r) => setAviso(r.data))
     api.post(`/api/avisos/${id}/visualizar`).catch(() => {})
     api.get(`/api/timeline/${id}/${userMoradorId()}`).then((r) => setMensagens(r.data.mensagens)).catch(() => {})
-  }
-  useEffect(() => { carregar() }, [id])
+  }, [id])
+
+  const marcarCiente = useCallback(async () => {
+    await api.post(`/api/avisos/${id}/ciente`, { resposta: resposta || null })
+    carregar()
+  }, [id, resposta, carregar])
+
+  useEffect(() => { carregar() }, [carregar])
   useEffect(() => {
     if (search.get('responder') === '1' && respRef.current) respRef.current.focus()
   }, [search, aviso])
   useEffect(() => {
     if (search.get('ciente') === '1' && aviso && !aviso.cienteEm) marcarCiente()
-  }, [aviso])
+  }, [aviso, search, marcarCiente])
 
   function userMoradorId() {
     const u = localStorage.getItem('user')
     return u ? JSON.parse(u).condominioId && JSON.parse(localStorage.getItem('user')!).perfil === 'Morador' ? JSON.parse(atob(localStorage.getItem('token')!.split('.')[1])).nameid ?? '' : '' : ''
-  }
-
-  async function marcarCiente() {
-    await api.post(`/api/avisos/${id}/ciente`, { resposta: resposta || null })
-    carregar()
   }
 
   async function enviarMensagem(e: React.FormEvent) {

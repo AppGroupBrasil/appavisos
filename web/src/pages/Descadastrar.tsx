@@ -9,15 +9,16 @@ export default function Descadastrar() {
   const [search] = useSearchParams()
   const moradorId = search.get('m') ?? ''
   const [info, setInfo] = useState<Info | null>(null)
-  const [erro, setErro] = useState('')
+  const [erroFetch, setErroFetch] = useState('')
   const [confirmando, setConfirmando] = useState(false)
   const [confirmado, setConfirmado] = useState(false)
+  const erro = !moradorId ? 'Link inválido.' : erroFetch
 
   useEffect(() => {
-    if (!moradorId) { setErro('Link inválido.'); return }
+    if (!moradorId) return
     api.get(`/api/publico/descadastrar/${moradorId}`)
       .then(r => setInfo(r.data))
-      .catch(() => setErro('Não encontramos seu cadastro. O link pode estar expirado.'))
+      .catch(() => setErroFetch('Não encontramos seu cadastro. O link pode estar expirado.'))
   }, [moradorId])
 
   async function confirmar() {
@@ -26,7 +27,7 @@ export default function Descadastrar() {
       await api.post(`/api/publico/descadastrar/${moradorId}`)
       setConfirmado(true)
     } catch {
-      setErro('Não foi possível concluir o descadastro. Tente novamente em instantes.')
+      setErroFetch('Não foi possível concluir o descadastro. Tente novamente em instantes.')
     } finally {
       setConfirmando(false)
     }

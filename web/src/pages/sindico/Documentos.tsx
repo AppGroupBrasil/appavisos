@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { api } from '../../lib/api'
+import { useCallback, useEffect, useState } from 'react'
+import { api, msgErro } from '../../lib/api'
 import { ShellSindico } from '../../components/Layout'
 import { Button, Card, Input, Label, Textarea } from '../../components/ui'
 
@@ -45,20 +45,20 @@ export default function Documentos() {
   const [salvandoCat, setSalvandoCat] = useState(false)
   const [erroCat, setErroCat] = useState('')
 
-  async function carregar() {
+  const carregar = useCallback(async () => {
     const r = await api.get('/api/avisos?tipo=5')
     setDocs(r.data)
-  }
+  }, [])
 
-  async function carregarCategorias() {
+  const carregarCategorias = useCallback(async () => {
     const r = await api.get('/api/categorias')
     setCategorias(r.data)
-  }
+  }, [])
 
   useEffect(() => {
     carregar()
     carregarCategorias()
-  }, [])
+  }, [carregar, carregarCategorias])
 
   async function uploadArquivo(file: File) {
     const fd = new FormData()
@@ -102,8 +102,8 @@ export default function Documentos() {
       }
       setFormAberto(false)
       await carregar()
-    } catch (e: any) {
-      setErro(e?.response?.data?.erro ?? 'Erro ao salvar')
+    } catch (e) {
+      setErro(msgErro(e, 'Erro ao salvar'))
     } finally { setSalvando(false) }
   }
 
@@ -121,8 +121,8 @@ export default function Documentos() {
       await api.post('/api/categorias', { nome: novaCat.trim() })
       setNovaCat('')
       await carregarCategorias()
-    } catch (e: any) {
-      setErroCat(e?.response?.data?.erro ?? 'Erro ao criar')
+    } catch (e) {
+      setErroCat(msgErro(e, 'Erro ao criar'))
     } finally { setSalvandoCat(false) }
   }
 
@@ -133,8 +133,8 @@ export default function Documentos() {
       await api.put(`/api/categorias/${editCat.id}`, { nome: editCat.nome.trim() })
       setEditCat(null)
       await carregarCategorias()
-    } catch (e: any) {
-      setErroCat(e?.response?.data?.erro ?? 'Erro ao renomear')
+    } catch (e) {
+      setErroCat(msgErro(e, 'Erro ao renomear'))
     } finally { setSalvandoCat(false) }
   }
 
@@ -143,8 +143,8 @@ export default function Documentos() {
     try {
       await api.delete(`/api/categorias/${id}`)
       await carregarCategorias()
-    } catch (e: any) {
-      setErroCat(e?.response?.data?.erro ?? 'Não foi possível excluir')
+    } catch (e) {
+      setErroCat(msgErro(e, 'Não foi possível excluir'))
     }
   }
 

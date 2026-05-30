@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { api } from '../../lib/api'
+import { api, msgErro } from '../../lib/api'
 import { Button, Card, Input, Label } from '../../components/ui'
 
 type Info = { condominio: { id: string; nome: string; logoUrl?: string; descricaoCurta?: string }; blocos: { id: string; nome: string }[] }
@@ -23,7 +23,7 @@ export default function CadastroPublico() {
     try {
       await api.post('/api/cadastro/morador', { slug, ...f, blocoId: f.blocoId || null })
       setOk(true)
-    } catch (err: any) { setErro(err.response?.data?.erro ?? 'Erro') } finally { setLoading(false) }
+    } catch (err) { setErro(msgErro(err, 'Erro')) } finally { setLoading(false) }
   }
 
   if (ok) return (

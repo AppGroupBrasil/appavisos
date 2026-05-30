@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { api } from '../lib/api'
+import { api, msgErro } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { Button, Input, Label, Card } from '../components/ui'
 
@@ -31,8 +31,8 @@ export default function CadastroCondominio() {
       const { data } = await api.post('/api/cadastro/condominio', f)
       setUser({ token: data.token, perfil: 'Sindico', nome: f.nomeSindico, condominioId: data.condominioId })
       nav('/painel')
-    } catch (err: any) {
-      setErro(err.response?.data?.erro ?? 'Erro')
+    } catch (err) {
+      setErro(msgErro(err, 'Erro'))
     } finally { setLoading(false) }
   }
 

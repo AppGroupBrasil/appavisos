@@ -2,14 +2,12 @@ using AppAvisos.Api.Auth;
 using AppAvisos.Domain.Enums;
 using AppAvisos.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppAvisos.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-[EnableRateLimiting("auth")]
 public class AuthController(AppDbContext db, JwtService jwt, AppAvisos.Api.Services.IEmailSender email, IConfiguration cfg) : ControllerBase
 {
     public record LoginReq(string Email, string Senha);

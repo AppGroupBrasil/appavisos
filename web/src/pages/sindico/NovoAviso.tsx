@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api } from '../../lib/api'
+import { api, msgErro } from '../../lib/api'
 import { ShellSindico } from '../../components/Layout'
 import { Button, Card, Input, Label, Textarea } from '../../components/ui'
 
@@ -85,8 +85,8 @@ export default function NovoAviso() {
       }
       void data
       nav('/painel')
-    } catch (err: any) {
-      setErro(err.response?.data?.erro ?? 'Erro')
+    } catch (err) {
+      setErro(msgErro(err, 'Erro'))
     } finally { setLoading(false) }
   }
 
@@ -133,8 +133,8 @@ export default function NovoAviso() {
           <div>
             <Label>Para quem</Label>
             <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg flex-wrap">
-              {[[1, 'Todo condomínio'], [2, 'Bloco'], [3, 'Morador'], [4, 'Área']].map(([v, l]) => (
-                <button type="button" key={v} onClick={() => setF({ ...f, escopo: v as any })}
+              {([[1, 'Todo condomínio'], [2, 'Bloco'], [3, 'Morador'], [4, 'Área']] as [1 | 2 | 3 | 4, string][]).map(([v, l]) => (
+                <button type="button" key={v} onClick={() => setF({ ...f, escopo: v })}
                   className={`flex-1 py-2 px-3 text-sm font-medium rounded-md ${f.escopo === v ? 'bg-white dark:bg-slate-900 shadow' : 'text-slate-600'}`}>{l}</button>
               ))}
             </div>
@@ -275,17 +275,17 @@ function ModalCategorias({ categorias, onClose, onChange }: { categorias: Catego
     e.preventDefault()
     if (!nova.trim()) return
     try { await api.post('/api/categorias', { nome: nova.trim() }); setNova(''); onChange() }
-    catch (err: any) { alert(err.response?.data?.erro ?? 'Erro') }
+    catch (err) { alert(msgErro(err, 'Erro')) }
   }
   async function salvarEdicao() {
     if (!editando) return
     try { await api.put(`/api/categorias/${editando.id}`, { nome: editando.nome }); setEditando(null); onChange() }
-    catch (err: any) { alert(err.response?.data?.erro ?? 'Erro') }
+    catch (err) { alert(msgErro(err, 'Erro')) }
   }
   async function excluir(id: string) {
     if (!confirm('Excluir categoria?')) return
     try { await api.delete(`/api/categorias/${id}`); onChange() }
-    catch (err: any) { alert(err.response?.data?.erro ?? 'Erro') }
+    catch (err) { alert(msgErro(err, 'Erro')) }
   }
 
   return (
@@ -331,17 +331,17 @@ function ModalAreas({ areas, onClose, onChange }: { areas: Area[]; onClose: () =
     e.preventDefault()
     if (!nova.trim()) return
     try { await api.post('/api/areas', { nome: nova.trim() }); setNova(''); onChange() }
-    catch (err: any) { alert(err.response?.data?.erro ?? 'Erro') }
+    catch (err) { alert(msgErro(err, 'Erro')) }
   }
   async function salvarEdicao() {
     if (!editando) return
     try { await api.put(`/api/areas/${editando.id}`, { nome: editando.nome }); setEditando(null); onChange() }
-    catch (err: any) { alert(err.response?.data?.erro ?? 'Erro') }
+    catch (err) { alert(msgErro(err, 'Erro')) }
   }
   async function excluir(id: string) {
     if (!confirm('Excluir área?')) return
     try { await api.delete(`/api/areas/${id}`); onChange() }
-    catch (err: any) { alert(err.response?.data?.erro ?? 'Erro') }
+    catch (err) { alert(msgErro(err, 'Erro')) }
   }
 
   return (

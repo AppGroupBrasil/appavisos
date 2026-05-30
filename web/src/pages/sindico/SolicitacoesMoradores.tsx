@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { api } from '../../lib/api'
 import { ShellSindico } from '../../components/Layout'
@@ -105,14 +105,14 @@ function AbaSolicitacoes() {
   const [resposta, setResposta] = useState('')
   const [enviando, setEnviando] = useState(false)
 
-  async function carregar() {
+  const carregar = useCallback(async () => {
     const p = new URLSearchParams()
     if (filtroStatus) p.set('status', filtroStatus)
     if (filtroCat) p.set('categoria', filtroCat)
     const r = await api.get(`/api/reportes?${p}`)
     setLista(r.data)
-  }
-  useEffect(() => { carregar() }, [filtroStatus, filtroCat])
+  }, [filtroStatus, filtroCat])
+  useEffect(() => { carregar() }, [carregar])
 
   async function abrir(id: string) {
     const r = await api.get(`/api/reportes/${id}`)
@@ -291,18 +291,17 @@ function AbaCanais() {
   const [areas, setAreas] = useState<Area[]>([])
   const [edit, setEdit] = useState<typeof NOVO_CANAL | null>(null)
   const [salvando, setSalvando] = useState(false)
-  const [origin, setOrigin] = useState('')
+  const [origin] = useState(() => window.location.origin)
 
-  useEffect(() => {
-    setOrigin(window.location.origin)
-    carregar()
-    api.get('/api/areas').then(r => setAreas(r.data))
-  }, [])
-
-  async function carregar() {
+  const carregar = useCallback(async () => {
     const r = await api.get('/api/canais-reporte')
     setCanais(r.data)
-  }
+  }, [])
+
+  useEffect(() => {
+    carregar()
+    api.get('/api/areas').then(r => setAreas(r.data))
+  }, [carregar])
 
   async function salvar() {
     if (!edit) return
