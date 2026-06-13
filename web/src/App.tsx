@@ -4,6 +4,7 @@ import { Protegida } from './components/Protegida'
 
 const Landing = lazy(() => import('./pages/Landing'))
 const Login = lazy(() => import('./pages/Login'))
+const Sso = lazy(() => import('./pages/Sso'))
 const CadastroCondominio = lazy(() => import('./pages/CadastroCondominio'))
 const Avisos = lazy(() => import('./pages/sindico/Avisos'))
 const NovoAviso = lazy(() => import('./pages/sindico/NovoAviso'))
@@ -42,6 +43,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/sso" element={<Sso />} />
         <Route path="/cadastrar-condominio" element={<CadastroCondominio />} />
         <Route path="/cadastro/:slug" element={<CadastroPublico />} />
         <Route path="/c/:slug" element={<MuralPublico />} />
