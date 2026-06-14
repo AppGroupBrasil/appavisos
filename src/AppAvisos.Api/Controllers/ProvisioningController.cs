@@ -4,6 +4,7 @@ using AppAvisos.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace AppAvisos.Api.Controllers;
 
@@ -68,6 +69,41 @@ public class ProvisioningController : ControllerBase
         _db.Usuarios.Add(novo);
         await _db.SaveChangesAsync();
         return Ok(new { ok = true, usuario_id = dto.usuario_id, id_local = novo.Id });
+    }
+
+    public record CadastroEvento(string? entidade, string? acao, Guid? condominio_id, JsonElement? dados);
+
+    // Receiver do push de cadastro da central (Fase 2 SSO). Espelho read-only:
+    // tabela Usuarios (casa por email). upsert atualiza nome; delete revoga
+    // removendo a linha. Idempotente; nunca cria usuário (entra por SSO).
+    [HttpPost("cadastro")]
+    public async Task<IActionResult> Cadastro([FromHeader(Name = "X-Provisioning-Secret")] string? secret, [FromBody] CadastroEvento ev)
+    {
+        var expected = _config["Provisioning:Secret"] ?? Environment.GetEnvironmentVariable("PROVISIONING_SECRET");
+        if (string.IsNullOrWhiteSpace(expected) || secret != expected)
+            return StatusCode(403, new { error = "Assinatura inválida" });
+
+        if (ev.entidade == "morador" || ev.entidade == "funcionario")
+        {
+            var d = ev.dados;
+            var email = (d.HasValue && d.Value.TryGetProperty("email", out var e) ? e.GetString() : null)?.Trim().ToLowerInvariant();
+            if (string.IsNullOrWhiteSpace(email)) return Ok(new { ok = true, ignorado = "sem email" });
+            var u = await _db.Usuarios.FirstOrDefaultAsync(x => x.Email.ToLower() == email);
+            if (u == null) return Ok(new { ok = true, ignorado = "usuário ausente" });
+            if (ev.acao == "delete")
+            {
+                _db.Usuarios.Remove(u);
+                await _db.SaveChangesAsync();
+                return Ok(new { ok = true });
+            }
+            if (d.HasValue && d.Value.TryGetProperty("nome", out var n) && n.GetString() is { Length: > 0 } nome)
+            {
+                u.Nome = nome;
+                await _db.SaveChangesAsync();
+            }
+            return Ok(new { ok = true });
+        }
+        return Ok(new { ok = true, ignorado = ev.entidade });
     }
 
     private static PerfilUsuario MapPerfil(string role)
