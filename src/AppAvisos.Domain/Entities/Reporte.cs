@@ -14,6 +14,7 @@ public class Reporte
     public string Titulo { get; set; } = "";
     public string Descricao { get; set; } = "";
     public string FotosJson { get; set; } = "[]";
+    public string? VideoUrl { get; set; }
 
     public string? Nome { get; set; }
     public string? Bloco { get; set; }

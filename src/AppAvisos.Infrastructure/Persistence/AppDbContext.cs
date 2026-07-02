@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
     public DbSet<Reporte> Reportes => Set<Reporte>();
     public DbSet<HistoricoReporte> HistoricosReporte => Set<HistoricoReporte>();
+    public DbSet<MensagemReporte> MensagensReporte => Set<MensagemReporte>();
     public DbSet<CanalReporte> CanaisReporte => Set<CanalReporte>();
     public DbSet<ConfiguracaoSistema> ConfiguracoesSistema => Set<ConfiguracaoSistema>();
     public DbSet<QrPersonalizado> QrPersonalizados => Set<QrPersonalizado>();
@@ -110,6 +111,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.Email).HasMaxLength(200);
             e.Property(x => x.TokenPublico).HasMaxLength(20).IsRequired();
             e.Property(x => x.FotosJson).IsRequired();
+            e.Property(x => x.VideoUrl).HasMaxLength(300);
             e.HasOne(x => x.Condominio).WithMany().HasForeignKey(x => x.CondominioId).OnDelete(DeleteBehavior.Cascade);
             e.HasOne(x => x.Area).WithMany().HasForeignKey(x => x.AreaId).OnDelete(DeleteBehavior.SetNull);
         });
@@ -119,6 +121,16 @@ public class AppDbContext : DbContext
             e.HasIndex(x => new { x.ReporteId, x.CriadoEm });
             e.Property(x => x.AutorNome).HasMaxLength(160);
             e.Property(x => x.AutorPerfil).HasMaxLength(40);
+            e.HasOne(x => x.Reporte).WithMany().HasForeignKey(x => x.ReporteId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<MensagemReporte>(e =>
+        {
+            e.HasIndex(x => new { x.ReporteId, x.CriadoEm });
+            e.Property(x => x.AutorNome).HasMaxLength(160);
+            e.Property(x => x.AutorPerfil).HasMaxLength(40);
+            e.Property(x => x.Texto).IsRequired();
+            e.Property(x => x.FotosJson).IsRequired();
             e.HasOne(x => x.Reporte).WithMany().HasForeignKey(x => x.ReporteId).OnDelete(DeleteBehavior.Cascade);
         });
 

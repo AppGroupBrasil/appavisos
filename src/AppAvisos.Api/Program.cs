@@ -4,6 +4,7 @@ using AppAvisos.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
@@ -120,6 +121,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
+builder.Services.AddRateLimiter(o =>
+{
+    o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    o.AddPolicy("publico", ctx => System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+        ctx.Connection.RemoteIpAddress?.ToString() ?? "anon",
+        _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 30,
+            Window = TimeSpan.FromMinutes(1)
+        }));
+});
+
 builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
     p.WithOrigins(
         "http://localhost:5173",
@@ -147,6 +160,7 @@ app.UseStaticFiles(new Microsoft.AspNetCore.Builder.StaticFileOptions
 });
 
 app.UseCors();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSerilogRequestLogging();

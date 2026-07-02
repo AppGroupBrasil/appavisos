@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { api } from '../../lib/api'
+import { comprimirImagem } from '../../lib/imagem'
 import { ShellSindico } from '../../components/Layout'
 import { Button, Card, Input, Label, Textarea } from '../../components/ui'
 
@@ -17,6 +18,16 @@ type ItemLista = {
   criadoEm: string
   respondidoEm?: string
   temFotos: boolean
+  temVideo?: boolean
+}
+
+type Mensagem = {
+  id: string
+  autorNome: string
+  autorPerfil: string
+  texto: string
+  fotos: string[]
+  criadoEm: string
 }
 
 type Detalhe = {
@@ -37,7 +48,9 @@ type Detalhe = {
   respondidoEm?: string
   respondidoPor?: string
   fotos: string[]
+  video?: string | null
   historico: { status: string; autorNome: string; autorPerfil: string; observacao?: string; criadoEm: string }[]
+  mensagens: Mensagem[]
   linkPublico: string
   linkPdf: string
 }
@@ -56,14 +69,16 @@ type Area = { id: string; nome: string }
 
 const STATUS_LABEL: Record<string, { txt: string; cls: string }> = {
   Aberto: { txt: 'Aberto', cls: 'bg-amber-100 text-amber-900' },
+  EmAnalise: { txt: 'Em análise', cls: 'bg-violet-600 text-white' },
   EmExecucao: { txt: 'Em execução', cls: 'bg-blue-600 text-white' },
   Finalizado: { txt: 'Finalizado', cls: 'bg-emerald-100 text-emerald-900' },
   Arquivado: { txt: 'Arquivado', cls: 'bg-slate-200 text-slate-800' },
 }
 
 const CAT_LABELS: Record<string, string> = {
-  Ocorrencia: 'Ocorrência', Manutencao: 'Manutenção',
-  Reclamacao: 'Reclamação', Sugestao: 'Sugestão', Outro: 'Outro',
+  Ocorrencia: 'Ocorrência', Manutencao: 'Manutenção', Solicitacao: 'Solicitação',
+  Reclamacao: 'Reclamação', SegundaViaBoleto: '2ª via de boleto', Informacao: 'Informação',
+  Sugestao: 'Sugestão', Outro: 'Outro',
 }
 
 const NOVO_CANAL = {
@@ -72,7 +87,8 @@ const NOVO_CANAL = {
 
 export default function SolicitacoesMoradores() {
   const [params, setParams] = useSearchParams()
-  const aba = (params.get('aba') === 'canais' ? 'canais' : 'solicitacoes') as 'solicitacoes' | 'canais'
+  const abaParam = params.get('aba')
+  const aba = (abaParam === 'canais' || abaParam === 'relatorios' ? abaParam : 'solicitacoes') as 'solicitacoes' | 'canais' | 'relatorios'
 
   return (
     <ShellSindico>
@@ -90,9 +106,14 @@ export default function SolicitacoesMoradores() {
           className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${aba === 'canais' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-700 hover:text-slate-900'}`}>
           Canais de Solicitações
         </button>
+        <button
+          onClick={() => setParams({ aba: 'relatorios' })}
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${aba === 'relatorios' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-700 hover:text-slate-900'}`}>
+          Relatórios
+        </button>
       </div>
 
-      {aba === 'solicitacoes' ? <AbaSolicitacoes /> : <AbaCanais />}
+      {aba === 'solicitacoes' ? <AbaSolicitacoes /> : aba === 'canais' ? <AbaCanais /> : <AbaRelatorios />}
     </ShellSindico>
   )
 }
@@ -104,6 +125,10 @@ function AbaSolicitacoes() {
   const [aberto, setAberto] = useState<Detalhe | null>(null)
   const [resposta, setResposta] = useState('')
   const [enviando, setEnviando] = useState(false)
+  const [msgTexto, setMsgTexto] = useState('')
+  const [msgFotos, setMsgFotos] = useState<string[]>([])
+  const [enviandoMsg, setEnviandoMsg] = useState(false)
+  const msgFileRef = useRef<HTMLInputElement>(null)
 
   const carregar = useCallback(async () => {
     const p = new URLSearchParams()
@@ -118,6 +143,36 @@ function AbaSolicitacoes() {
     const r = await api.get(`/api/reportes/${id}`)
     setAberto(r.data)
     setResposta(r.data.resposta ?? '')
+    setMsgTexto('')
+    setMsgFotos([])
+  }
+
+  async function enviarMsg() {
+    if (!aberto || (!msgTexto.trim() && msgFotos.length === 0)) return
+    setEnviandoMsg(true)
+    try {
+      const r = await api.post(`/api/reportes/${aberto.id}/mensagens`, { texto: msgTexto, fotos: msgFotos })
+      setAberto(a => a ? { ...a, mensagens: r.data } : a)
+      setMsgTexto('')
+      setMsgFotos([])
+    } finally { setEnviandoMsg(false) }
+  }
+
+  async function anexarFotoMsg(files: FileList | null) {
+    if (!aberto || !files) return
+    let qtd = msgFotos.length
+    for (const f of Array.from(files)) {
+      if (qtd >= 3) break
+      try {
+        const blob = await comprimirImagem(f)
+        const fd = new FormData()
+        fd.append('file', blob, 'foto.jpg')
+        const r = await api.post(`/api/reportes/${aberto.id}/mensagens/foto`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+        setMsgFotos(p => [...p, r.data.url])
+        qtd++
+      } catch { break }
+    }
+    if (msgFileRef.current) msgFileRef.current.value = ''
   }
 
   async function responder() {
@@ -149,6 +204,7 @@ function AbaSolicitacoes() {
           <select value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)} className="px-2 py-1 border border-slate-300 rounded text-slate-900">
             <option value="">Todos status</option>
             <option value="Aberto">Aberto</option>
+            <option value="EmAnalise">Em análise</option>
             <option value="EmExecucao">Em execução</option>
             <option value="Finalizado">Finalizado</option>
             <option value="Arquivado">Arquivado</option>
@@ -175,6 +231,7 @@ function AbaSolicitacoes() {
                       </span>
                       {STATUS_LABEL[r.status] && <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_LABEL[r.status].cls}`}>{STATUS_LABEL[r.status].txt}</span>}
                       {r.temFotos && <span className="text-xs text-slate-700">📷</span>}
+                      {r.temVideo && <span className="text-xs text-slate-700">🎥</span>}
                       <span className="text-xs text-slate-600 font-mono">#{r.protocolo}</span>
                     </div>
                     <div className="font-medium text-slate-900">{r.titulo}</div>
@@ -218,6 +275,10 @@ function AbaSolicitacoes() {
               </div>
             )}
 
+            {aberto.video && (
+              <video src={aberto.video} controls playsInline className="w-full max-h-80 rounded-lg bg-black mb-4" />
+            )}
+
             {(aberto.nome || aberto.apartamento) && (
               <div className="bg-slate-50 rounded-lg p-3 mb-4 text-sm">
                 <div className="font-medium mb-1 text-slate-900">Identificação</div>
@@ -232,6 +293,7 @@ function AbaSolicitacoes() {
               <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_LABEL[aberto.status]?.cls}`}>{STATUS_LABEL[aberto.status]?.txt}</span>
                 <span className="text-xs text-slate-700">Mudar para:</span>
+                {aberto.status !== 'EmAnalise' && <button onClick={() => mudarStatus('EmAnalise')} className="text-xs px-2 py-1 rounded bg-violet-600 text-white hover:bg-violet-700">Em análise</button>}
                 {aberto.status !== 'EmExecucao' && <button onClick={() => mudarStatus('EmExecucao')} className="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700">Em execução</button>}
                 {aberto.status !== 'Finalizado' && <button onClick={() => mudarStatus('Finalizado')} className="text-xs px-2 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700">Finalizado</button>}
                 {aberto.status !== 'Arquivado' && <button onClick={() => mudarStatus('Arquivado')} className="text-xs px-2 py-1 rounded bg-slate-600 text-white hover:bg-slate-700">Arquivar</button>}
@@ -279,8 +341,293 @@ function AbaSolicitacoes() {
                 {enviando ? 'Enviando...' : aberto.resposta ? 'Atualizar resposta' : 'Enviar resposta'}
               </Button>
             </div>
+
+            <div className="pt-4 border-t mt-4">
+              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                <div className="text-sm font-medium text-slate-900">Chat com o morador</div>
+                <div className="flex items-center gap-1 flex-wrap">
+                  <span className="text-xs text-slate-600">Status:</span>
+                  {['Aberto', 'EmAnalise', 'EmExecucao', 'Finalizado'].filter(s => s !== aberto.status).map(s => (
+                    <button key={s} onClick={() => mudarStatus(s)}
+                      className="text-xs px-2 py-1 rounded bg-slate-900 text-white hover:bg-slate-700">
+                      {STATUS_LABEL[s].txt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-slate-50 rounded-lg p-3 max-h-80 overflow-y-auto space-y-2">
+                {(!aberto.mensagens || aberto.mensagens.length === 0) && (
+                  <div className="text-xs text-slate-600">Nenhuma mensagem ainda.</div>
+                )}
+                {aberto.mensagens?.map(m => (
+                  <div key={m.id} className={`p-2.5 rounded-lg text-sm max-w-[85%] ${m.autorPerfil === 'Morador' ? 'bg-white border border-slate-200' : 'bg-blue-100 ml-auto'}`}>
+                    <div className="text-[11px] font-semibold text-slate-600">{m.autorNome} · {m.autorPerfil}</div>
+                    {m.texto && <div className="whitespace-pre-wrap text-slate-900 mt-0.5">{m.texto}</div>}
+                    {m.fotos?.length > 0 && (
+                      <div className="flex gap-1 mt-1 flex-wrap">
+                        {m.fotos.map((f, i) => (
+                          <a key={i} href={f} target="_blank" rel="noreferrer">
+                            <img src={f} alt="" className="w-16 h-16 object-cover rounded border" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                    <div className="text-[11px] text-slate-500 mt-1">{new Date(m.criadoEm).toLocaleString('pt-BR')}</div>
+                  </div>
+                ))}
+              </div>
+              {msgFotos.length > 0 && (
+                <div className="flex gap-2 mt-2">
+                  {msgFotos.map((f, i) => (
+                    <div key={i} className="relative">
+                      <img src={f} alt="" className="w-14 h-14 object-cover rounded border" />
+                      <button onClick={() => setMsgFotos(p => p.filter((_, j) => j !== i))}
+                        className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-xs w-5 h-5 rounded-full leading-none">×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="mt-2">
+                <Textarea value={msgTexto} onChange={e => setMsgTexto(e.target.value)} rows={2} placeholder="Mensagem para o morador..." />
+              </div>
+              <div className="flex gap-2 mt-2">
+                <input ref={msgFileRef} type="file" accept="image/*" multiple className="hidden" onChange={e => anexarFotoMsg(e.target.files)} />
+                <Button variant="secondary" onClick={() => msgFileRef.current?.click()}>Anexar foto</Button>
+                <Button onClick={enviarMsg} disabled={enviandoMsg || (!msgTexto.trim() && msgFotos.length === 0)}>
+                  {enviandoMsg ? 'Enviando...' : 'Enviar mensagem'}
+                </Button>
+              </div>
+              {aberto.email
+                ? <div className="text-[11px] text-slate-500 mt-1">O morador recebe um e-mail a cada mensagem enviada.</div>
+                : <div className="text-[11px] text-slate-500 mt-1">O morador acompanha o chat pelo link público do protocolo.</div>}
+            </div>
           </div>
         </div>
+      )}
+    </>
+  )
+}
+
+type RelLinha = {
+  protocolo: string
+  categoria: string
+  titulo: string
+  status: string
+  nome?: string
+  bloco?: string
+  apartamento?: string
+  area?: string
+  abertoEm: string
+  emAnaliseEm?: string
+  emAnalisePor?: string
+  emExecucaoEm?: string
+  emExecucaoPor?: string
+  finalizadoEm?: string
+  finalizadoPor?: string
+  minAbertoParaAnalise?: number
+  minAnaliseParaExecucao?: number
+  minAbertoParaFinalizado?: number
+}
+
+type Relatorio = {
+  total: number
+  porStatus: Record<string, number>
+  porCategoria: Record<string, number>
+  porBloco: Record<string, number>
+  tempoMedioMin: { abertoParaAnalise?: number; analiseParaExecucao?: number; abertoParaFinalizado?: number }
+  linhas: RelLinha[]
+}
+
+function fmtMin(min?: number | null) {
+  if (min == null) return '—'
+  const m = Math.round(min)
+  const d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mm = m % 60
+  return [d ? `${d}d` : '', h ? `${h}h` : '', `${mm}min`].filter(Boolean).join(' ')
+}
+
+function AbaRelatorios() {
+  const [de, setDe] = useState('')
+  const [ate, setAte] = useState('')
+  const [cat, setCat] = useState('')
+  const [st, setSt] = useState('')
+  const [bloco, setBloco] = useState('')
+  const [rel, setRel] = useState<Relatorio | null>(null)
+  const [carregando, setCarregando] = useState(false)
+
+  async function gerar() {
+    setCarregando(true)
+    try {
+      const p = new URLSearchParams()
+      if (de) p.set('de', de)
+      if (ate) p.set('ate', ate)
+      if (cat) p.set('categoria', cat)
+      if (st) p.set('status', st)
+      if (bloco.trim()) p.set('bloco', bloco.trim())
+      const r = await api.get(`/api/reportes/relatorio?${p}`)
+      setRel(r.data)
+    } finally { setCarregando(false) }
+  }
+
+  useEffect(() => { gerar() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function exportarCsv() {
+    if (!rel) return
+    const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
+    const dt = (v?: string) => v ? new Date(v).toLocaleString('pt-BR') : ''
+    const cab = ['Protocolo', 'Categoria', 'Título', 'Status', 'Nome', 'Bloco', 'Apto', 'Área',
+      'Aberto em', 'Em análise em', 'Em análise por', 'Em execução em', 'Em execução por',
+      'Finalizado em', 'Finalizado por', 'Tempo até análise', 'Tempo análise→execução', 'Tempo até finalizado']
+    const linhas = rel.linhas.map(l => [
+      l.protocolo, CAT_LABELS[l.categoria] ?? l.categoria, l.titulo, STATUS_LABEL[l.status]?.txt ?? l.status,
+      l.nome, l.bloco, l.apartamento, l.area,
+      dt(l.abertoEm), dt(l.emAnaliseEm), l.emAnalisePor, dt(l.emExecucaoEm), l.emExecucaoPor,
+      dt(l.finalizadoEm), l.finalizadoPor,
+      l.minAbertoParaAnalise != null ? fmtMin(l.minAbertoParaAnalise) : '',
+      l.minAnaliseParaExecucao != null ? fmtMin(l.minAnaliseParaExecucao) : '',
+      l.minAbertoParaFinalizado != null ? fmtMin(l.minAbertoParaFinalizado) : '',
+    ].map(esc).join(';'))
+    const csv = '\uFEFF' + [cab.map(esc).join(';'), ...linhas].join('\r\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `relatorio-solicitacoes-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(a.href)
+  }
+
+  return (
+    <>
+      <Card className="p-4 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
+          <div>
+            <Label>De</Label>
+            <Input type="date" value={de} onChange={e => setDe(e.target.value)} />
+          </div>
+          <div>
+            <Label>Até</Label>
+            <Input type="date" value={ate} onChange={e => setAte(e.target.value)} />
+          </div>
+          <div>
+            <Label>Categoria</Label>
+            <select value={cat} onChange={e => setCat(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900">
+              <option value="">Todas</option>
+              {Object.entries(CAT_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+          </div>
+          <div>
+            <Label>Status</Label>
+            <select value={st} onChange={e => setSt(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900">
+              <option value="">Todos</option>
+              {Object.entries(STATUS_LABEL).map(([v, l]) => <option key={v} value={v}>{l.txt}</option>)}
+            </select>
+          </div>
+          <div>
+            <Label>Bloco</Label>
+            <Input value={bloco} onChange={e => setBloco(e.target.value)} placeholder="Todos" maxLength={80} />
+          </div>
+        </div>
+        <div className="flex gap-2 mt-4">
+          <Button onClick={gerar} disabled={carregando}>{carregando ? 'Gerando...' : 'Gerar relatório'}</Button>
+          <Button variant="secondary" onClick={exportarCsv} disabled={!rel || rel.linhas.length === 0}>Exportar CSV</Button>
+        </div>
+      </Card>
+
+      {rel && (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+            <Card className="p-4">
+              <div className="text-xs text-slate-600 uppercase tracking-wider">Total</div>
+              <div className="text-2xl font-bold text-slate-900">{rel.total}</div>
+            </Card>
+            <Card className="p-4">
+              <div className="text-xs text-slate-600 uppercase tracking-wider">Tempo médio até análise</div>
+              <div className="text-lg font-bold text-slate-900">{fmtMin(rel.tempoMedioMin.abertoParaAnalise)}</div>
+            </Card>
+            <Card className="p-4">
+              <div className="text-xs text-slate-600 uppercase tracking-wider">Análise → execução</div>
+              <div className="text-lg font-bold text-slate-900">{fmtMin(rel.tempoMedioMin.analiseParaExecucao)}</div>
+            </Card>
+            <Card className="p-4">
+              <div className="text-xs text-slate-600 uppercase tracking-wider">Tempo médio até finalizado</div>
+              <div className="text-lg font-bold text-slate-900">{fmtMin(rel.tempoMedioMin.abertoParaFinalizado)}</div>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+            <Card className="p-4">
+              <div className="text-sm font-medium mb-2 text-slate-900">Por status</div>
+              {Object.entries(rel.porStatus).map(([k, v]) => (
+                <div key={k} className="flex justify-between text-sm py-0.5">
+                  <span className="text-slate-700">{STATUS_LABEL[k]?.txt ?? k}</span>
+                  <span className="font-semibold text-slate-900">{v}</span>
+                </div>
+              ))}
+            </Card>
+            <Card className="p-4">
+              <div className="text-sm font-medium mb-2 text-slate-900">Por categoria</div>
+              {Object.entries(rel.porCategoria).map(([k, v]) => (
+                <div key={k} className="flex justify-between text-sm py-0.5">
+                  <span className="text-slate-700">{CAT_LABELS[k] ?? k}</span>
+                  <span className="font-semibold text-slate-900">{v}</span>
+                </div>
+              ))}
+            </Card>
+            <Card className="p-4">
+              <div className="text-sm font-medium mb-2 text-slate-900">Por bloco</div>
+              {Object.keys(rel.porBloco).length === 0
+                ? <div className="text-sm text-slate-600">Sem informação de bloco.</div>
+                : Object.entries(rel.porBloco).map(([k, v]) => (
+                  <div key={k} className="flex justify-between text-sm py-0.5">
+                    <span className="text-slate-700">{k}</span>
+                    <span className="font-semibold text-slate-900">{v}</span>
+                  </div>
+                ))}
+            </Card>
+          </div>
+
+          {rel.linhas.length === 0 ? (
+            <div className="text-center text-slate-700 py-12">Nenhum registro no período.</div>
+          ) : (
+            <Card className="p-0 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-left text-xs text-slate-600 uppercase">
+                    <th className="px-3 py-2">Protocolo</th>
+                    <th className="px-3 py-2">Categoria</th>
+                    <th className="px-3 py-2">Título</th>
+                    <th className="px-3 py-2">Status</th>
+                    <th className="px-3 py-2">Morador</th>
+                    <th className="px-3 py-2">Bloco/Apto</th>
+                    <th className="px-3 py-2">Aberto em</th>
+                    <th className="px-3 py-2">Até análise</th>
+                    <th className="px-3 py-2">Até finalizado</th>
+                    <th className="px-3 py-2">Finalizado por</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rel.linhas.map(l => (
+                    <tr key={l.protocolo} className="border-b border-slate-100">
+                      <td className="px-3 py-2 font-mono text-xs">{l.protocolo}</td>
+                      <td className="px-3 py-2">{CAT_LABELS[l.categoria] ?? l.categoria}</td>
+                      <td className="px-3 py-2 max-w-[220px] truncate" title={l.titulo}>{l.titulo}</td>
+                      <td className="px-3 py-2">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_LABEL[l.status]?.cls ?? ''}`}>
+                          {STATUS_LABEL[l.status]?.txt ?? l.status}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2">{l.nome ?? 'Anônimo'}</td>
+                      <td className="px-3 py-2">{[l.bloco, l.apartamento].filter(Boolean).join(' / ') || '—'}</td>
+                      <td className="px-3 py-2 whitespace-nowrap">{new Date(l.abertoEm).toLocaleString('pt-BR')}</td>
+                      <td className="px-3 py-2 whitespace-nowrap">{fmtMin(l.minAbertoParaAnalise)}</td>
+                      <td className="px-3 py-2 whitespace-nowrap">{fmtMin(l.minAbertoParaFinalizado)}</td>
+                      <td className="px-3 py-2">{l.finalizadoPor ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Card>
+          )}
+        </>
       )}
     </>
   )
